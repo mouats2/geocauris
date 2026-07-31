@@ -1,0 +1,25 @@
+{
+  "name": "geocauris-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "firebase": "https://registry.npmjs.org/firebase/-/firebase-12.17.0.tgz",
+    "firebase-admin": "https://registry.npmjs.org/firebase-admin/-/firebase-admin-14.2.0.tgz",
+    "next": "14.2.31",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.30",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "typescript": "5.8.3"
+  }
+}
