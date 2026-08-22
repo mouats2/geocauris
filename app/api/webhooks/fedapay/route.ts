@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminFirestore } from "../../../../lib/firebase-admin";
+import { adminFirestoreOnly } from "../../../../lib/firebase-firestore-admin";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -12,11 +12,11 @@ export async function POST(request: Request) {
   const status = String(transaction.status ?? transaction.state ?? "").toLowerCase();
   if (["approved", "transferred", "paid"].includes(status)) {
     const transactionId = String(transaction.id ?? transaction.reference ?? "");
-    const metadata = transaction.metadata ?? {};
+    const metadata = transaction.custom_metadata ?? transaction.metadata ?? {};
     const uid = String(metadata.uid ?? "");
     const credits = Number(metadata.credits ?? 0);
     if (!transactionId || !uid || !credits) return NextResponse.json({ error: "Métadonnées FedaPay incomplètes" }, { status: 400 });
-    const db = adminFirestore();
+    const db = adminFirestoreOnly();
     const eventRef = db.collection("fedapayTransactions").doc(transactionId);
     const walletRef = db.collection("wallets").doc(uid);
     const result = await db.runTransaction(async (firestoreTransaction) => {
