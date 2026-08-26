@@ -20,6 +20,12 @@ export async function requireAdmin(request: Request) {
   return decoded;
 }
 
+export async function requireUser(request: Request) {
+  const bearer = request.headers.get("authorization");
+  if (!bearer?.startsWith("Bearer ")) throw new Error("UNAUTHORIZED");
+  return verifyFirebaseToken(bearer.slice(7));
+}
+
 function encryptionKey() {
   const value = process.env.IMOLE_KEYS_ENCRYPTION_KEY;
   if (!value) throw new Error("IMOLE_KEYS_ENCRYPTION_KEY_MISSING");
