@@ -1,6 +1,6 @@
 # GeoCauris
 
-Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Firebase, FedaPay et Imọlẹ.
+Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Firebase et Imọlẹ.
 
 - Production : https://geocauris.vercel.app
 - Administration : https://geocauris.vercel.app/admin
@@ -15,7 +15,7 @@ Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Fireb
 | 2 500 cauris | 3 500 FCFA |
 | 5 000 cauris | 7 000 FCFA |
 
-Le prestataire de paiement retenu est **FedaPay**. La route `/api/payments/fedapay` crée une transaction XOF côté serveur et les routes `/api/fedapay/webhook` et `/api/webhooks/fedapay` reçoivent les confirmations. Le fournisseur IA est **Imọlẹ** ; le site fourni est https://imole.app/ et l'URL API est `https://api.imole.app/v1`.
+La recharge en ligne est temporairement indisponible : le moyen de paiement précédent (FedaPay) a été retiré du projet. Un nouveau prestataire de paiement reste à choisir et à intégrer avant de réactiver l'achat de cauris depuis l'interface.
 
 Le projet Firebase configuré est `geocauris`. Firebase Auth et Firestore sont utilisés pour les profils, wallets, transactions, consommations et clés API.
 
@@ -34,11 +34,11 @@ La clé maître reste uniquement côté serveur. Le compte administrateur config
 ## Fonctionnalités
 
 - Authentification Firebase et espace utilisateur.
-- Achat de cauris par packs via FedaPay ; le crédit est confirmé par webhook.
-- Pages Consommation, Ma clé API, Documentation et Centre d’aide.
-- Proxy Imọlẹ avec réservation, débit et remboursement des cauris selon l’utilisation.
-- Interface d’administration séparée à `/admin`.
-- Pool de clés Imọlẹ côté serveur : ajout chiffré, activation, recalibrage du solde et seuil d’alerte.
+- Packs de cauris affichés à titre indicatif ; l'achat en ligne est désactivé en attendant un nouveau moyen de paiement.
+- Pages Consommation, Ma clé API, Documentation et Centre d'aide.
+- Proxy Imọlẹ avec réservation, débit et remboursement des cauris selon l'utilisation.
+- Interface d'administration séparée à `/admin`.
+- Pool de clés Imọlẹ côté serveur : ajout chiffré, activation, recalibrage du solde et seuil d'alerte.
 - Alertes e-mail administrateur via Resend lorsque le solde Imọlẹ approche du seuil configuré.
 
 ## Démarrage
@@ -50,16 +50,12 @@ npm run dev
 
 Ouvrir http://localhost:3000.
 
-## Variables d’environnement
+## Variables d'environnement
 
-Copier `.env.example` vers `.env.local`, puis renseigner les valeurs correspondant à l’environnement utilisé. Les clés privées FedaPay, Imọlẹ, Firebase Admin, Resend et le secret webhook doivent rester côté serveur et ne doivent jamais être commités.
-
-Pour un test FedaPay, utiliser les clés `sandbox` et l’URL API sandbox. Pour la production, utiliser les clés `live`, le webhook de production et un domaine autorisé dans FedaPay.
+Copier `.env.example` vers `.env.local`, puis renseigner les valeurs correspondant à l'environnement utilisé. Les clés privées Imọlẹ, Firebase Admin, Resend et le secret webhook doivent rester côté serveur et ne doivent jamais être commités.
 
 ## Routes principales
 
-- `POST /api/payments/fedapay` : crée une transaction de paiement.
-- `POST /api/fedapay/webhook` : traite les événements FedaPay approuvés, transférés ou échoués.
 - `GET/POST /api/wallet` : consulte le wallet et prépare une recharge.
 - `POST /api/keys` : génère une clé API GeoCauris.
 - `POST /api/proxy` : exécute une requête Imọlẹ avec débit des cauris.
@@ -67,6 +63,8 @@ Pour un test FedaPay, utiliser les clés `sandbox` et l’URL API sandbox. Pour 
 
 ## Déploiement
 
-Le projet est prévu pour Vercel : importer le dépôt GitHub, configurer les variables d’environnement dans les environnements Preview et Production, puis redéployer. Le webhook doit pointer vers l’URL correspondant au même environnement.
+Le projet est prévu pour Vercel : importer le dépôt GitHub, configurer les variables d'environnement dans les environnements Preview et Production, puis redéployer.
 
-Avant d’activer les paiements réels, vérifier les clés FedaPay live, le secret webhook live, le domaine autorisé et la réception de `transaction.approved` ou `transaction.transferred`.
+## Prochaine étape : paiement
+
+Avant de réactiver la recharge en ligne, choisir un nouveau prestataire de paiement, l'intégrer (création de transaction + webhook de confirmation signé), et mettre à jour la fonction `buy()` dans `app/page.tsx` ainsi que ce README en conséquence.
