@@ -21,5 +21,5 @@ export async function POST(request: Request) {
   const credits = Number(body.credits);
   const pack = CAURIS_PACKS.find((item) => item.credits === credits);
   if (!pack) return NextResponse.json({ error: "Pack invalide" }, { status: 400 });
-  return NextResponse.json({ status: "payment_pending", packId: pack.id, credits: pack.credits, amountXof: pack.priceXof, provider: "fedapay", message: "Créer une transaction FedaPay puis attendre le webhook serveur." }, { status: 202 });
+  return NextResponse.json({ status: "payment_unavailable", packId: pack.id, credits: pack.credits, amountXof: pack.priceXof, message: "Aucun moyen de paiement n'est configuré pour le moment." }, { status: 503 });
 }
