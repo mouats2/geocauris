@@ -1,6 +1,6 @@
 # GeoCauris
 
-Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Firebase et Imọlẹ.
+Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Firebase, SasPay (paiement) et Imọlẹ.
 
 - Production : https://geocauris.vercel.app
 - Administration : https://geocauris.vercel.app/admin
@@ -15,11 +15,19 @@ Plateforme Next.js de revente de crédits IA (« cauris »), connectée à Fireb
 | 2 500 cauris | 3 500 FCFA |
 | 5 000 cauris | 7 000 FCFA |
 
-La recharge en ligne est temporairement indisponible : le moyen de paiement précédent (FedaPay) a été retiré du projet. Un nouveau prestataire de paiement reste à choisir et à intégrer avant de réactiver l'achat de cauris depuis l'interface.
-
 Le projet Firebase configuré est `geocauris`. Firebase Auth et Firestore sont utilisés pour les profils, wallets, transactions, consommations et clés API.
 
 Les règles Firestore sont dans `firestore.rules`. Déploiement avec Firebase CLI : `firebase deploy --only firestore:rules`.
+
+## Paiement (SasPay)
+
+L'achat de cauris passe par le checkout hébergé de SasPay :
+
+1. Le client choisit un pack ; `POST /api/payments/saspay` authentifie l'utilisateur, fixe le montant côté serveur (jamais depuis le navigateur) et crée une session de checkout SasPay (`POST /checkout-sessions/`). L'intention est journalisée dans Firestore (`checkoutSessions`).
+2. Le client est redirigé vers `checkout_url` où il choisit lui-même son réseau mobile money ou sa carte.
+3. SasPay notifie `POST /api/webhooks/saspay` (event `transaction.success`), signé en HMAC SHA-256 (`X-Webhook-Signature` / `X-Webhook-Timestamp`, tolérance de 5 minutes). Le webhook retrouve la session de checkout correspondante, vérifie la cohérence (uid, pack, montant) puis crédite le wallet de façon idempotente.
+
+Variables requises : `SASPAY_SECRET_KEY` (clé secrète marchand, jamais exposée au client) et `SASPAY_WEBHOOK_SECRET` (secret de signature, généré une seule fois dans le tableau de bord SasPay lors de la création du webhook `transaction.success` pointant vers `/api/webhooks/saspay`).
 
 ## API Imọlẹ confirmée
 
@@ -34,7 +42,7 @@ La clé maître reste uniquement côté serveur. Le compte administrateur config
 ## Fonctionnalités
 
 - Authentification Firebase et espace utilisateur.
-- Packs de cauris affichés à titre indicatif ; l'achat en ligne est désactivé en attendant un nouveau moyen de paiement.
+- Achat de cauris via checkout hébergé SasPay (mobile money / carte), confirmé par webhook signé.
 - Pages Consommation, Ma clé API, Documentation et Centre d'aide.
 - Proxy Imọlẹ avec réservation, débit et remboursement des cauris selon l'utilisation.
 - Interface d'administration séparée à `/admin`.
@@ -52,19 +60,17 @@ Ouvrir http://localhost:3000.
 
 ## Variables d'environnement
 
-Copier `.env.example` vers `.env.local`, puis renseigner les valeurs correspondant à l'environnement utilisé. Les clés privées Imọlẹ, Firebase Admin, Resend et le secret webhook doivent rester côté serveur et ne doivent jamais être commités.
+Copier `.env.example` vers `.env.local`, puis renseigner les valeurs correspondant à l'environnement utilisé. Les clés privées Imọlẹ, Firebase Admin, SasPay, Resend et le secret webhook doivent rester côté serveur et ne doivent jamais être commités.
 
 ## Routes principales
 
-- `GET/POST /api/wallet` : consulte le wallet et prépare une recharge.
+- `GET/POST /api/wallet` : consulte le wallet.
+- `POST /api/payments/saspay` : crée une session de checkout SasPay pour un pack donné.
+- `POST /api/webhooks/saspay` : reçoit et vérifie les events SasPay, crédite le wallet.
 - `POST /api/keys` : génère une clé API GeoCauris.
 - `POST /api/proxy` : exécute une requête Imọlẹ avec débit des cauris.
 - `GET/POST/PATCH /api/admin/imole-keys` : administre le pool de clés Imọlẹ.
 
 ## Déploiement
 
-Le projet est prévu pour Vercel : importer le dépôt GitHub, configurer les variables d'environnement dans les environnements Preview et Production, puis redéployer.
-
-## Prochaine étape : paiement
-
-Avant de réactiver la recharge en ligne, choisir un nouveau prestataire de paiement, l'intégrer (création de transaction + webhook de confirmation signé), et mettre à jour la fonction `buy()` dans `app/page.tsx` ainsi que ce README en conséquence.
+Le projet est prévu pour Vercel : importer le dépôt GitHub, configurer les variables d'environnement dans les environnements Preview et Production, puis redéployer. Penser à créer le webhook SasPay (event `transaction.success`) pointant vers `https://<votre-domaine>/api/webhooks/saspay` depuis le tableau de bord SasPay, et à reporter le secret de signature généré dans `SASPAY_WEBHOOK_SECRET`.
