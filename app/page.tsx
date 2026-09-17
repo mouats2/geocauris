@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { ArrowUpRight, BookOpenText, ChartLineUp, Copy, Key, ShieldCheck, SquaresFour } from "@phosphor-icons/react";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { firebaseAuth, firestore } from "../lib/firebase";
 import { CAURIS_PACKS } from "../lib/pricing";
 
@@ -67,8 +67,8 @@ function Dashboard({ user }: { user: User }) {
         const walletSnapshot = await getDoc(doc(firestore, "wallets", user.uid));
         setBalance(Number(walletSnapshot.data()?.soldeCauris ?? 0));
       } catch { accountHasError = true; }
-      const transactionsQuery = query(collection(firestore, "transactions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"), limit(6));
-      const usageQuery = query(collection(firestore, "usageLogs"), where("uid", "==", user.uid), orderBy("createdAt", "desc"), limit(6));
+      const transactionsQuery = query(collection(firestore, "transactions"), where("uid", "==", user.uid));
+      const usageQuery = query(collection(firestore, "usageLogs"), where("uid", "==", user.uid));
       const [transactionResult, usageResult] = await Promise.all([getDocs(transactionsQuery).then((snapshot) => ({ snapshot, failed: false })).catch(() => ({ snapshot: null, failed: true })), getDocs(usageQuery).then((snapshot) => ({ snapshot, failed: false })).catch(() => ({ snapshot: null, failed: true }))]);
       const transactionSnapshot = transactionResult.snapshot;
       const usageSnapshot = usageResult.snapshot;
