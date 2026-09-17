@@ -26,7 +26,7 @@ describe("payment routes", () => {
 
   it("creates a server-priced checkout for an authenticated user", async () => {
     const { POST } = await import("../app/api/payments/saspay/route");
-    const response = await POST(new Request("http://localhost/api/payments/saspay", { method: "POST", body: JSON.stringify({ packId: "pack-250" }) }));
+    const response = await POST(new Request("http://localhost/api/payments/saspay", { method: "POST", body: JSON.stringify({ packId: "starter" }) }));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ paymentUrl: "https://checkout.example.test/session" });
     expect(mocks.createCheckoutSession).toHaveBeenCalledWith(expect.objectContaining({ amount: "350.00", customer_email: "client@example.com", metadata: expect.objectContaining({ uid: "uid-1", credits: 250 }) }));
