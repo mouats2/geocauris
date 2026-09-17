@@ -12,7 +12,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "firebase": "https://registry.npmjs.org/firebase/-/firebase-12.17.0.tgz",
     "firebase-admin": "https://registry.npmjs.org/firebase-admin/-/firebase-admin-14.2.0.tgz",
-    "next": "14.2.31",
+    "next": "16.3.5",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

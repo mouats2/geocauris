@@ -16,6 +16,7 @@ async function saspayRequest<T>(path: string, init: RequestInit = {}): Promise<T
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: { Authorization: `Bearer ${secretKey()}`, "Content-Type": "application/json", ...(init.headers ?? {}) },
+    signal: AbortSignal.timeout(15000),
     cache: "no-store",
   });
   const payload = (await response.json().catch(() => null)) as SaspayEnvelope<T> | null;

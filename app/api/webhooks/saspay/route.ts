@@ -35,16 +35,11 @@ export async function POST(request: Request) {
   const { id: transactionId, amount, currency } = event.data;
   const db = adminFirestoreOnly();
 
-  // Idempotence : un renvoi de livraison (SasPay retente jusqu'à 5 fois)
-  // ne doit jamais créditer deux fois le même wallet.
   const paymentRef = db.collection("transactions").doc(transactionId);
-  const alreadyProcessed = await paymentRef.get();
-  if (alreadyProcessed.exists) return NextResponse.json({ received: true });
-
   const session = await findSessionForTransaction(transactionId);
   if (!session) {
     console.error("SasPay webhook: aucune session de checkout ne correspond à la transaction", transactionId);
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ error: "Session de paiement temporairement introuvable" }, { status: 503 });
   }
 
   const uid = String(session.metadata.uid ?? "");
@@ -59,7 +54,9 @@ export async function POST(request: Request) {
   }
 
   const walletRef = db.collection("wallets").doc(uid);
-  await db.runTransaction(async (transaction) => {
+  const credited = await db.runTransaction(async (transaction) => {
+    const existingPayment = await transaction.get(paymentRef);
+    if (existingPayment.exists) return false;
     const walletSnapshot = await transaction.get(walletRef);
     const balance = Number(walletSnapshot.data()?.soldeCauris ?? 0);
     transaction.update(walletRef, { soldeCauris: balance + pack.credits, updatedAt: FieldValue.serverTimestamp() });
@@ -76,7 +73,8 @@ export async function POST(request: Request) {
       createdAt: FieldValue.serverTimestamp(),
     });
     transaction.update(db.collection("checkoutSessions").doc(session.id), { status: "paid", paidAt: FieldValue.serverTimestamp() });
+    return true;
   });
 
-  return NextResponse.json({ received: true });
+  return NextResponse.json({ received: true, status: credited ? "wallet_credited" : "already_processed" });
 }
