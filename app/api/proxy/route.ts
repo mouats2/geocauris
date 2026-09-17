@@ -5,12 +5,12 @@ import { adminFirestoreOnly } from "../../../lib/firebase-firestore-admin";
 import { decryptSecret } from "../../../lib/admin";
 import { estimateCaurisCost } from "../../../lib/pricing";
 import { sendLowBalanceAlert } from "../../../lib/alerts";
-import { checkRateLimit } from "../../../lib/rate-limit";
+import { checkRateLimitAsync } from "../../../lib/rate-limit";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("authorization");
   if (!auth?.startsWith("Bearer cau_")) return NextResponse.json({ error: { message: "Clé API GeoCauris invalide", type: "authentication_error" } }, { status: 401 });
-  const rate = checkRateLimit(`proxy:${auth.slice(7)}`, 60, 60_000);
+  const rate = await checkRateLimitAsync(`proxy:${auth.slice(7)}`, 60, 60_000);
   if (!rate.allowed) return NextResponse.json({ error: { message: "Trop de requêtes. Réessayez plus tard.", type: "rate_limit_error" } }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   const baseUrl = process.env.IMOLE_API_BASE_URL;
   if (!baseUrl) return NextResponse.json({ error: { message: "Le fournisseur IA n'est pas configuré côté serveur", type: "configuration_error" } }, { status: 503 });

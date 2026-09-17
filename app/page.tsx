@@ -61,17 +61,24 @@ function Dashboard({ user }: { user: User }) {
 
   useEffect(() => {
     async function loadAccount() {
-      const walletSnapshot = await getDoc(doc(firestore, "wallets", user.uid));
-      setBalance(Number(walletSnapshot.data()?.soldeCauris ?? 0));
+      setNotice("");
+      let accountHasError = false;
+      try {
+        const walletSnapshot = await getDoc(doc(firestore, "wallets", user.uid));
+        setBalance(Number(walletSnapshot.data()?.soldeCauris ?? 0));
+      } catch { accountHasError = true; }
       const transactionsQuery = query(collection(firestore, "transactions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"), limit(6));
       const usageQuery = query(collection(firestore, "usageLogs"), where("uid", "==", user.uid), orderBy("createdAt", "desc"), limit(6));
-      const [transactionSnapshot, usageSnapshot] = await Promise.all([getDocs(transactionsQuery).catch(() => null), getDocs(usageQuery).catch(() => null)]);
+      const [transactionResult, usageResult] = await Promise.all([getDocs(transactionsQuery).then((snapshot) => ({ snapshot, failed: false })).catch(() => ({ snapshot: null, failed: true })), getDocs(usageQuery).then((snapshot) => ({ snapshot, failed: false })).catch(() => ({ snapshot: null, failed: true }))]);
+      const transactionSnapshot = transactionResult.snapshot;
+      const usageSnapshot = usageResult.snapshot;
+      accountHasError = accountHasError || transactionResult.failed || usageResult.failed;
       const transactionRows = transactionSnapshot?.docs.map((item) => { const data = item.data(); const cauris = Number(data.cauris ?? data.coutCauris ?? 0); const credit = data.type === "credit" || cauris > 0; return { id: `transaction-${item.id}`, label: data.label ?? (credit ? "Recharge de compte" : "Consommation IA"), model: data.model ?? "GeoCauris", amount: `${credit ? "+" : "−"} ${Math.abs(cauris).toLocaleString("fr-FR")}`, cauris: Math.abs(cauris), inputTokens: Number(data.tokensEntree ?? data.inputTokens ?? 0), outputTokens: Number(data.tokensSortie ?? data.outputTokens ?? 0), costXof: Number(data.coutXof ?? 0), type: credit ? "credit" : "debit", createdAt: data.createdAt } as Activity; }) ?? [];
       const usageRows = usageSnapshot?.docs.map((item) => { const data = item.data(); const cauris = Number(data.coutCauris ?? 0); return { id: `usage-${item.id}`, label: "Consommation IA", model: data.model ?? "Imọlẹ", amount: `− ${cauris.toLocaleString("fr-FR")}`, cauris, inputTokens: Number(data.tokensEntree ?? 0), outputTokens: Number(data.tokensSortie ?? 0), costXof: 0, type: "debit", createdAt: data.createdAt } as Activity; }) ?? [];
       const rows = [...transactionRows, ...usageRows].sort((a, b) => Number(b.createdAt?.seconds ?? 0) - Number(a.createdAt?.seconds ?? 0)).slice(0, 6);
-      setActivities(rows); setDataLoading(false);
+      setActivities(rows); if (accountHasError) setNotice("Impossible de charger toutes vos données Firestore. Réessayez dans quelques instants."); setDataLoading(false);
     }
-    loadAccount().catch(() => setDataLoading(false));
+    loadAccount().catch(() => { setNotice("Impossible de charger votre compte. Vérifiez votre connexion puis réessayez."); setDataLoading(false); });
   }, [user.uid]);
   useEffect(() => {
     if (active !== "Administration" || user.email !== (process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "oliviergnacadja693@gmail.com")) return;

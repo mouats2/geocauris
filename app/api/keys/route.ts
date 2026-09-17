@@ -3,14 +3,14 @@ import crypto from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminFirestoreOnly } from "../../../lib/firebase-firestore-admin";
 import { verifyFirebaseToken } from "../../../lib/admin";
-import { checkRateLimit } from "../../../lib/rate-limit";
+import { checkRateLimitAsync } from "../../../lib/rate-limit";
 
 export async function POST(request: Request) {
   const bearer = request.headers.get("authorization");
   if (!bearer?.startsWith("Bearer ")) return NextResponse.json({ error: "Authentification Firebase requise." }, { status: 401 });
   let user;
   try { user = await verifyFirebaseToken(bearer.slice(7)); } catch { return NextResponse.json({ error: "Token Firebase invalide." }, { status: 401 }); }
-  const rate = checkRateLimit(`key:${user.uid}`, 3, 60 * 60 * 1000);
+  const rate = await checkRateLimitAsync(`key:${user.uid}`, 3, 60 * 60 * 1000);
   if (!rate.allowed) return NextResponse.json({ error: "Trop de générations de clés. Réessayez plus tard." }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   const rawKey = `cau_live_${crypto.randomBytes(24).toString("hex")}`;
   const hash = crypto.createHash("sha256").update(rawKey).digest("hex");

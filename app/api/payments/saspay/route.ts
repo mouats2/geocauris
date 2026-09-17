@@ -4,7 +4,7 @@ import { adminFirestoreOnly } from "../../../../lib/firebase-firestore-admin";
 import { requireUser } from "../../../../lib/admin";
 import { CAURIS_PACKS } from "../../../../lib/pricing";
 import { createCheckoutSession } from "../../../../lib/saspay";
-import { checkRateLimit } from "../../../../lib/rate-limit";
+import { checkRateLimitAsync } from "../../../../lib/rate-limit";
 
 export async function POST(request: Request) {
   let user: { uid: string; email: string };
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
   }
-  const rate = checkRateLimit(`payment:${user.uid}`, 5, 60_000);
+  const rate = await checkRateLimitAsync(`payment:${user.uid}`, 5, 60_000);
   if (!rate.allowed) return NextResponse.json({ error: "Trop de tentatives de paiement. Réessayez plus tard." }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
 
   const body = await request.json().catch(() => ({}));
