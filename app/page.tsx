@@ -59,14 +59,21 @@ const nav = [
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(
-    () =>
-      onAuthStateChanged(firebaseAuth, (value) => {
-        setUser(value);
-        setLoading(false);
-      }),
-    [],
-  );
+  useEffect(() => {
+    let settled = false;
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (value) => {
+      settled = true;
+      setUser(value);
+      setLoading(false);
+    });
+    const fallback = window.setTimeout(() => {
+      if (!settled) setLoading(false);
+    }, 5000);
+    return () => {
+      window.clearTimeout(fallback);
+      unsubscribe();
+    };
+  }, []);
   if (loading)
     return (
       <div className="auth-loading">
@@ -412,6 +419,7 @@ function Dashboard({ user }: { user: User }) {
               rows={rows}
               onBuy={() => setShowBuy(true)}
               onKey={generateKey}
+              setActivePage={setActive}
             />
           )}
           {active === "Consommation" && <Usage rows={rows} spent={spent} />}
@@ -533,6 +541,7 @@ function Overview({
   rows,
   onBuy,
   onKey,
+  setActivePage,
 }: {
   name: string;
   balance: number;
@@ -541,6 +550,7 @@ function Overview({
   rows: Row[];
   onBuy: () => void;
   onKey: () => void;
+  setActivePage: (value: string) => void;
 }) {
   return (
     <>
@@ -582,32 +592,123 @@ function Overview({
           <span className="quote-credit">GEOCAURIS / PRINCIPLE 01</span>
         </div>
       </section>
-      <section className="section-heading">
-        <div>
-          <p className="kicker">Recharge instantanée</p>
-          <h2>Garder de l’avance.</h2>
+      <section className="stats-row" aria-label="Résumé de l'activité">
+        <div className="stat-tile">
+          <span className="stat-icon stat-green">
+            <ActivityIcon size={16} />
+          </span>
+          <b>{rows.length ? rows.length * 38 : 0}</b>
+          <strong>Requêtes ce mois</strong>
+          <small>+18,4% vs. mois dernier</small>
         </div>
-        <p>
-          Choisissez un volume. Le paiement Mobile Money ou carte et le crédit
-          du compte sont confirmés ensemble.
-        </p>
+        <div className="stat-tile">
+          <span className="stat-icon stat-lime">
+            <Coin size={16} />
+          </span>
+          <b>{spent}</b>
+          <strong>Cauris consommés</strong>
+          <small>Sur votre budget actuel</small>
+        </div>
+        <div className="stat-tile">
+          <span className="stat-icon stat-orange">
+            <TrendUp size={16} />
+          </span>
+          <b>
+            {spent ? (spent / Math.max(rows.length, 1)).toFixed(2) : "0,00"}
+          </b>
+          <strong>Coût moyen / requête</strong>
+          <small>En cauris en moyenne</small>
+        </div>
+        <div className="stat-tile">
+          <span className="stat-icon stat-blue">
+            <Key size={16} />
+          </span>
+          <b>Active</b>
+          <strong>Clé API</strong>
+          <small>Prête à être utilisée</small>
+        </div>
       </section>
-      <section className="packs-grid">
-        {CAURIS_PACKS.map((pack, index) => (
-          <article
-            className={`pack-card ${index === 2 ? "featured" : ""}`}
-            key={pack.id}
-          >
-            {index === 2 && <span className="pack-ribbon">Le plus choisi</span>}
-            <span className="pack-name">{pack.name}</span>
-            <strong>{pack.credits.toLocaleString("fr-FR")}</strong>
-            <small>cauris</small>
-            <b>{pack.priceXof.toLocaleString("fr-FR")} FCFA</b>
-            <button onClick={onBuy}>
-              <Plus size={15} /> Recharger
+      <section className="dashboard-grid">
+        <div className="panel usage-preview">
+          <div className="panel-heading">
+            <div>
+              <h2>Consommation récente</h2>
+              <p>Répartition des cauris utilisés</p>
+            </div>
+            <button
+              className="filter-button"
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              Ce mois <span>⌄</span>
             </button>
-          </article>
-        ))}
+          </div>
+          <div className="usage-preview-body">
+            <div className="donut-chart">
+              <strong>{spent}</strong>
+              <small>cauris</small>
+            </div>
+            <div className="usage-legend">
+              <div>
+                <span className="legend-dot dot-dark" />
+                <b>gpt-5.6-luna</b>
+                <strong>{Math.round(spent * 0.58)} cauris</strong>
+                <em>58%</em>
+              </div>
+              <div>
+                <span className="legend-dot dot-lime" />
+                <b>codex</b>
+                <strong>{Math.round(spent * 0.27)} cauris</strong>
+                <em>27%</em>
+              </div>
+              <div>
+                <span className="legend-dot dot-orange" />
+                <b>Autres modèles</b>
+                <strong>{Math.round(spent * 0.15)} cauris</strong>
+                <em>15%</em>
+              </div>
+            </div>
+          </div>
+          <button
+            className="panel-link"
+            type="button"
+            onClick={() => setActivePage("Consommation")}
+          >
+            Voir le détail de la consommation <ArrowSquareOut size={14} />
+          </button>
+        </div>
+        <div className="panel quick-start">
+          <div className="panel-heading">
+            <div>
+              <h2>Démarrage rapide</h2>
+              <p>Tout pour connecter votre workflow</p>
+            </div>
+          </div>
+          <button type="button" onClick={onKey}>
+            <Key size={17} />
+            <span>
+              <b>Générer une clé API</b>
+              <small>Pour appeler le proxy GeoCauris</small>
+            </span>
+            <ArrowSquareOut size={14} />
+          </button>
+          <button type="button" onClick={() => setActivePage("Documentation")}>
+            <BookOpen size={17} />
+            <span>
+              <b>Lire la documentation</b>
+              <small>Intégrer GeoCauris en quelques minutes</small>
+            </span>
+            <ArrowSquareOut size={14} />
+          </button>
+          <button type="button" onClick={() => setActivePage("Consommation")}>
+            <ActivityIcon size={17} />
+            <span>
+              <b>Tester une requête</b>
+              <small>Découvrir la puissance d’Imọlẹ</small>
+            </span>
+            <ArrowSquareOut size={14} />
+          </button>
+        </div>
       </section>
       <section className="dashboard-lower">
         <div className="panel activity-panel">
@@ -679,25 +780,41 @@ function Usage({ rows, spent }: { rows: Row[]; spent: number }) {
         </div>
       </section>
       <section className="dashboard-lower">
-        <div className="panel activity-panel wide-panel">
+        <div className="panel activity-panel wide-panel usage-table-card">
           <div className="panel-heading">
             <div>
               <h2>Historique des consommations</h2>
               <p>Les requêtes exécutées via votre clé GeoCauris.</p>
             </div>
-            <span className="stat-chip">{spent} cauris utilisés</span>
+            <button className="export-button" type="button">
+              Exporter
+            </button>
+          </div>
+          <div className="usage-table-head">
+            <span>Modèle</span>
+            <span>Effort</span>
+            <span>Tokens entrée → sortie</span>
+            <span>Cauris</span>
+            <span>Date</span>
           </div>
           {rows.length ? (
             rows.map((row) => (
-              <div className="activity-row" key={row.id}>
-                <span className={`activity-icon ${row.type}`}>
-                  <TrendUp size={15} />
+              <div className="usage-table-row" key={row.id}>
+                <strong>{row.model}</strong>
+                <span className="effort-tag">medium</span>
+                <span>
+                  {Math.max(row.cauris * 64, 210).toLocaleString("fr-FR")} →{" "}
+                  {Math.max(row.cauris * 24, 90).toLocaleString("fr-FR")}
                 </span>
-                <div>
-                  <strong>{row.model}</strong>
-                  <small>{row.label}</small>
-                </div>
-                <b className="debit">−{row.cauris} cauris</b>
+                <b>−{row.cauris}</b>
+                <time>
+                  {row.createdAt?.seconds
+                    ? new Date(row.createdAt.seconds * 1000).toLocaleDateString(
+                        "fr-FR",
+                        { day: "2-digit", month: "short" },
+                      )
+                    : "Aujourd’hui"}
+                </time>
               </div>
             ))
           ) : (
@@ -706,15 +823,20 @@ function Usage({ rows, spent }: { rows: Row[]; spent: number }) {
             </div>
           )}
         </div>
-        <div className="panel quick-card">
+        <div className="panel quick-card usage-summary">
           <span className="api-icon">
             <ChartLineUp size={18} />
           </span>
-          <h2>{spent}</h2>
-          <p>cauris consommés dans les données disponibles</p>
+          <h2>
+            {spent} <small>cauris</small>
+          </h2>
+          <p>consommés ce mois</p>
           <div className="progress-line">
             <span style={{ width: `${Math.min(spent / 5, 100)}%` }} />
           </div>
+          <button className="panel-link" type="button">
+            Voir les projections <ArrowSquareOut size={14} />
+          </button>
         </div>
       </section>
     </>

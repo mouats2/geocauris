@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./dashboard.css";
+import "./metrics.css";
 
 export const metadata: Metadata = {
   title: "GeoCauris - crédits IA pour la cartographie",
