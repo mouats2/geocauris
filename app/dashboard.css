@@ -1,0 +1,369 @@
+/* Workspace layout inspired by the approved GeoCauris dashboard reference. */
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+}
+.sidebar {
+  width: 242px;
+  min-height: 100dvh;
+  padding: 28px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 242px;
+  background: #fff;
+  border-right: 1px solid #e8ece6;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 9px 28px;
+  color: var(--forest);
+  text-decoration: none;
+  font-family: Manrope, Arial, sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.06em;
+}
+.sidebar-logo {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: end;
+  gap: 2px;
+}
+.sidebar-logo span {
+  display: block;
+  width: 5px;
+  border-radius: 2px 2px 0 0;
+  transform: skew(-12deg);
+}
+.sidebar-logo span:nth-child(1) {
+  height: 13px;
+  background: #ef8c57;
+}
+.sidebar-logo span:nth-child(2) {
+  height: 19px;
+  background: #a9d55d;
+}
+.sidebar-logo span:nth-child(3) {
+  height: 24px;
+  background: var(--forest);
+}
+.account-card {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #edf0ea;
+  border-radius: 10px;
+  background: #fafbf8;
+  color: var(--ink);
+  text-align: left;
+}
+.account-card:hover {
+  border-color: #dbe8c1;
+  background: #f8fbef;
+}
+.account-avatar {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border-radius: 8px;
+  background: #ef8c57;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+.account-card span:nth-child(2),
+.sidebar-user span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.account-card b,
+.sidebar-user b {
+  overflow: hidden;
+  color: #45564b;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-card small,
+.sidebar-user small {
+  overflow: hidden;
+  color: #9aa49d;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-caret {
+  margin-left: auto;
+  color: #9aa59d;
+}
+.sidebar-label {
+  margin: 28px 10px 10px;
+  color: #a4aea6;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.sidebar-nav {
+  display: grid;
+  gap: 4px;
+}
+.sidebar-nav button,
+.sidebar-nav-button {
+  width: 100%;
+  min-height: 39px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  background: transparent;
+  color: #859088;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+.sidebar-nav button:hover,
+.sidebar-nav button.selected,
+.sidebar-nav-button:hover,
+.sidebar-nav-button.selected {
+  background: #eef8db;
+  color: var(--forest);
+}
+.sidebar-nav button:hover,
+.sidebar-nav-button:hover {
+  transform: translateX(2px);
+}
+.sidebar-spacer {
+  flex: 1;
+  min-height: 30px;
+}
+.sidebar-balance {
+  padding: 15px 13px;
+  border-radius: 10px;
+  background: var(--forest);
+  color: #fff;
+}
+.sidebar-balance small {
+  color: #b2c5b8;
+  font-size: 9px;
+}
+.sidebar-balance strong {
+  display: block;
+  margin: 5px 0 12px;
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 20px;
+  letter-spacing: -0.05em;
+}
+.sidebar-balance em {
+  color: var(--lime);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.sidebar-balance button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  background: transparent;
+  color: var(--lime);
+  font-size: 10px;
+  font-weight: 800;
+}
+.sidebar-user {
+  margin-top: 14px;
+  padding: 12px 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #eef1ec;
+}
+.sidebar-user .account-avatar {
+  width: 27px;
+  height: 27px;
+  flex-basis: 27px;
+  background: #c8e977;
+  color: var(--forest);
+  border-radius: 50%;
+}
+.sidebar-user button {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  background: transparent;
+  color: #9aa59d;
+}
+.app-main {
+  min-width: 0;
+  flex: 1;
+}
+.app-main .topbar {
+  height: 72px;
+  padding: 0 43px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  background: rgba(246, 247, 241, 0.9);
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #a0aaa2;
+  font-size: 10px;
+}
+.breadcrumb b {
+  color: #c4ccc5;
+  font-weight: 400;
+}
+.breadcrumb strong {
+  color: var(--forest);
+  font-weight: 800;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.topbar-help {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  color: #7e8c83;
+  font-size: 10px;
+}
+.topbar-help:hover {
+  color: var(--forest);
+}
+.topbar-buy {
+  min-height: 36px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 7px;
+  background: var(--forest);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 7px 16px rgba(25, 56, 44, 0.12);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+.topbar-buy:hover {
+  transform: translateY(-1px);
+  background: #285440;
+}
+.app-main .page {
+  max-width: 1120px;
+  padding-top: 42px;
+}
+.app-main .balance-card {
+  min-height: 232px;
+  background: linear-gradient(115deg, var(--forest), #285844);
+}
+.app-main .balance-card::before {
+  content: "IA × géospatial";
+  position: absolute;
+  right: 34px;
+  top: 29px;
+  color: rgba(201, 238, 115, 0.8);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+.app-main .balance-card::after {
+  width: 360px;
+  height: 230px;
+  right: -70px;
+  top: -10px;
+  transform: rotate(-17deg);
+}
+.app-main .balance-number {
+  font-size: 58px;
+}
+.app-main .dashboard-lower {
+  grid-template-columns: 1.35fr 0.65fr;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 205px;
+    flex-basis: 205px;
+  }
+  .app-main .topbar {
+    padding: 0 24px;
+  }
+  .app-main .page {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+@media (max-width: 720px) {
+  .app-shell {
+    display: block;
+  }
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sidebar-brand {
+    padding: 0 0 12px;
+  }
+  .account-card,
+  .sidebar-label,
+  .sidebar-spacer,
+  .sidebar-balance,
+  .sidebar-user,
+  .sidebar-nav-button {
+    display: none;
+  }
+  .sidebar-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 5px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .sidebar-nav button {
+    width: auto;
+    min-width: 39px;
+    padding: 0 9px;
+    font-size: 0;
+  }
+  .sidebar-nav button span {
+    display: none;
+  }
+  .app-main .topbar {
+    height: 60px;
+    padding: 0 16px;
+  }
+  .topbar-help {
+    display: none;
+  }
+  .app-main .page {
+    padding: 28px 16px 40px;
+  }
+}
