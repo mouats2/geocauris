@@ -8,6 +8,8 @@
   --lime: #c8f28c;
   --orange: #e9824b;
   --white: #fff;
+  --shadow-soft: 0 18px 45px rgba(23, 61, 51, 0.08);
+  --shadow-hover: 0 22px 55px rgba(23, 61, 51, 0.14);
 }
 * {
   box-sizing: border-box;
@@ -17,9 +19,17 @@ html {
 }
 body {
   margin: 0;
-  background: var(--paper);
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(200, 242, 140, 0.16),
+      transparent 26rem
+    ),
+    var(--paper);
   color: var(--ink);
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 button {
   border: 0;
@@ -140,11 +150,12 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(247, 248, 243, 0.92);
+  background: rgba(247, 248, 243, 0.84);
   position: sticky;
   top: 0;
   z-index: 10;
   backdrop-filter: blur(16px);
+  box-shadow: 0 1px 0 rgba(23, 61, 51, 0.03);
 }
 .wordmark {
   display: flex;
@@ -166,6 +177,7 @@ input:focus-visible,
   color: var(--lime);
   border-radius: 9px;
   font-size: 20px;
+  box-shadow: 0 8px 18px rgba(23, 61, 51, 0.16);
 }
 .wordmark-dot {
   color: var(--orange);
@@ -184,12 +196,19 @@ input:focus-visible,
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
 }
 .topnav button:hover,
 .topnav button.selected {
   color: var(--forest);
   background: #e7f0df;
   font-weight: 700;
+}
+.topnav button:hover {
+  transform: translateY(-1px);
 }
 .profile {
   display: flex;
@@ -216,6 +235,18 @@ input:focus-visible,
   width: min(1180px, 90vw);
   margin: 0 auto;
   padding: 68px 0 38px;
+}
+.page > * {
+  animation: reveal-up 0.55s ease both;
+}
+.page > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.page > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.page > *:nth-child(4) {
+  animation-delay: 0.12s;
 }
 .intro {
   display: flex;
@@ -490,6 +521,7 @@ input:focus-visible,
   border-radius: 20px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-hover);
 }
 .balance-card:after {
   content: "";
@@ -549,6 +581,7 @@ input:focus-visible,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border: 1px solid rgba(23, 61, 51, 0.06);
 }
 .quote-mark {
   color: var(--orange);
@@ -605,11 +638,15 @@ input:focus-visible,
   align-items: flex-start;
   transition:
     transform 0.2s,
-    border-color 0.2s;
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+  box-shadow: 0 8px 24px rgba(23, 61, 51, 0.035);
 }
 .pack-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
   border-color: #a8c29d;
+  box-shadow: var(--shadow-soft);
 }
 .pack-card.featured {
   background: #f0f5e8;
@@ -671,6 +708,14 @@ input:focus-visible,
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 24px;
+  box-shadow: 0 8px 24px rgba(23, 61, 51, 0.035);
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.panel:hover {
+  border-color: #cbd8c8;
+  box-shadow: var(--shadow-soft);
 }
 .panel-heading {
   display: flex;
@@ -775,6 +820,15 @@ input:focus-visible,
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.regenerate:hover {
+  background: var(--deep);
+  box-shadow: 0 10px 20px rgba(23, 61, 51, 0.16);
+  transform: translateY(-1px);
 }
 .regenerate:active,
 .pack-card button:active,
@@ -928,6 +982,16 @@ footer a {
 .admin-key-actions button:hover {
   background: #e5efdd;
 }
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @media (max-width: 1050px) {
   .packs-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -941,8 +1005,8 @@ footer a {
     min-width: auto;
   }
   .topnav button {
-    font-size: 0;
-    padding: 9px;
+    font-size: 11px;
+    padding: 8px 9px;
   }
   .topnav button svg {
     width: 19px;
@@ -1028,6 +1092,16 @@ footer a {
   }
   .topnav {
     gap: 0;
+    max-width: 46vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .topnav::-webkit-scrollbar {
+    display: none;
+  }
+  .topnav button {
+    font-size: 0;
+    flex: 0 0 auto;
   }
   .profile span:not(.online) {
     display: none;
@@ -1094,6 +1168,9 @@ footer a {
   }
   .pack-card {
     transition: none;
+  }
+  .page > * {
+    animation: none;
   }
   .pack-card:hover,
   .pack-card:active {
