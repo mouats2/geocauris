@@ -64,16 +64,29 @@ type ImoleKey = {
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(
-    () =>
-      onAuthStateChanged(firebaseAuth, (nextUser) => {
-        setUser(nextUser);
-        setLoading(false);
-      }),
-    [],
-  );
-  if (loading)
-    return <div className="auth-loading">Chargement de GeoCauris...</div>;
+  useEffect(() => {
+    let settled = false;
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (nextUser) => {
+      settled = true;
+      setUser(nextUser);
+      setLoading(false);
+    });
+    const fallback = window.setTimeout(() => {
+      if (!settled) setLoading(false);
+    }, 5000);
+    return () => {
+      window.clearTimeout(fallback);
+      unsubscribe();
+    };
+  }, []);
+  if (loading) {
+    return (
+      <div className="auth-loading" role="status" aria-live="polite">
+        <span className="loading-mark">G</span>
+        <span>Chargement de GeoCauris...</span>
+      </div>
+    );
+  }
   return user ? <Dashboard user={user} /> : <AuthScreen />;
 }
 

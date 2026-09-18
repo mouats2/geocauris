@@ -49,6 +49,27 @@ input:focus-visible,
   place-items: center;
   color: var(--forest);
   font-weight: 700;
+  gap: 14px;
+  align-content: center;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(200, 242, 140, 0.25),
+      transparent 18rem
+    ),
+    var(--paper);
+}
+.loading-mark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--forest);
+  color: var(--lime);
+  font-size: 26px;
+  box-shadow: 0 12px 28px rgba(23, 61, 51, 0.18);
+  animation: loading-pulse 1.4s ease-in-out infinite;
 }
 .auth-shell {
   min-height: 100dvh;
@@ -992,6 +1013,15 @@ footer a {
     transform: translateY(0);
   }
 }
+@keyframes loading-pulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.04);
+  }
+}
 @media (max-width: 1050px) {
   .packs-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -1170,6 +1200,9 @@ footer a {
     transition: none;
   }
   .page > * {
+    animation: none;
+  }
+  .loading-mark {
     animation: none;
   }
   .pack-card:hover,
