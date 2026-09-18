@@ -156,12 +156,39 @@ function AuthScreen() {
 
   return (
     <main className="auth-shell">
-      <div className="auth-brand">
-        <span className="wordmark-mark">G</span>
-        <strong>
-          GeoCauris<span className="wordmark-dot">.</span>
-        </strong>
-      </div>
+      <aside className="auth-aside">
+        <div className="auth-brand">
+          <span className="wordmark-mark">G</span>
+          <strong>
+            GeoCauris<span className="wordmark-dot">.</span>
+          </strong>
+        </div>
+        <div className="auth-aside-copy">
+          <p className="kicker light">IA × géospatial</p>
+          <h2>Votre réserve IA, au rythme de vos cartes.</h2>
+          <p>
+            Rechargez vos cauris, connectez Codex et gardez une vision simple de
+            chaque requête.
+          </p>
+        </div>
+        <div className="auth-visual" aria-hidden="true">
+          <span className="auth-orbit orbit-one" />
+          <span className="auth-orbit orbit-two" />
+          <span className="auth-map-line map-line-one" />
+          <span className="auth-map-line map-line-two" />
+          <strong>
+            GEO
+            <br />
+            CAURIS
+          </strong>
+        </div>
+        <div className="auth-aside-foot">
+          <span>
+            <i /> Paiements sécurisés
+          </span>
+          <span>Conçu pour les workflows QGIS</span>
+        </div>
+      </aside>
       <section className="auth-card">
         <div className="auth-copy">
           <p className="kicker">IA × géospatial</p>
