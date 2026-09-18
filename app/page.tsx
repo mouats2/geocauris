@@ -367,6 +367,7 @@ function Dashboard({ user }: { user: User }) {
         active={active}
         setActive={setActive}
         user={user}
+        balance={balance}
         onBuy={() => setShowBuy(true)}
       />
       <div className="app-main">
@@ -437,11 +438,13 @@ function Sidebar({
   active,
   setActive,
   user,
+  balance,
   onBuy,
 }: {
   active: string;
   setActive: (value: string) => void;
   user: User;
+  balance: number;
   onBuy: () => void;
 }) {
   const isAdmin =
@@ -496,7 +499,7 @@ function Sidebar({
       <div className="sidebar-balance">
         <small>Votre solde</small>
         <strong>
-          -- <em>cauris</em>
+          {balance.toLocaleString("fr-FR")} <em>cauris</em>
         </strong>
         <button type="button" onClick={onBuy}>
           Recharger <ArrowSquareOut size={13} />
