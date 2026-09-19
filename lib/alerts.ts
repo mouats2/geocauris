@@ -3,9 +3,11 @@ import { FieldValue, type DocumentReference, type Firestore } from "firebase-adm
 const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 export async function sendLowBalanceAlert(db: Firestore, ref: DocumentReference, label: string, balance: number, threshold: number) {
-  const resendKey = process.env.RESEND_API_KEY;
-  const recipient = process.env.ADMIN_ALERT_EMAIL ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!resendKey || !recipient) return;
+  const serviceId = process.env.EMAILJS_SERVICE_ID;
+  const templateId = process.env.EMAILJS_TEMPLATE_ID;
+  const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+  const recipient = process.env.EMAILJS_ADMIN_EMAIL ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  if (!serviceId || !templateId || !publicKey || !recipient) return;
   const claimed = await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
     const last = snapshot.data()?.lastAlertAt;
@@ -15,5 +17,21 @@ export async function sendLowBalanceAlert(db: Firestore, ref: DocumentReference,
     return true;
   });
   if (!claimed) return;
-  await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: process.env.ALERT_FROM_EMAIL ?? "GeoCauris <onboarding@resend.dev>", to: [recipient], subject: `Alerte stock Imọlẹ : ${label}`, html: `<p>La réserve Imọlẹ <strong>${label}</strong> est proche de l'épuisement.</p><p>Solde estimé : <strong>${balance.toLocaleString("fr-FR")} cauris</strong><br>Seuil configuré : <strong>${threshold.toLocaleString("fr-FR")} cauris</strong></p><p>Rechargez la réserve puis utilisez « Recalibrer le solde » dans l'administration GeoCauris.</p>` }) });
+  await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: {
+        to_email: recipient,
+        subject: `Action requise : rechargez le solde Imọlẹ (${label})`,
+        reserve_label: label,
+        estimated_balance: balance.toLocaleString("fr-FR"),
+        alert_threshold: threshold.toLocaleString("fr-FR"),
+        recharge_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://geocauris.vercel.app",
+      },
+    }),
+  });
 }
