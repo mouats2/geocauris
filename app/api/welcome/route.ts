@@ -18,11 +18,18 @@ export async function POST(request: Request) {
     await db.runTransaction(async (transaction) => {
       const welcome = await transaction.get(reservationRef);
       const wallet = await transaction.get(walletRef);
-      const pool = await transaction.get(db.collection("imoleKeys").where("status", "==", "active").limit(1));
+      const pool = await transaction.get(db.collection("imoleKeys").limit(20));
       if (welcome.exists || wallet.data()?.welcomeCaurisGranted === true) return;
-      if (pool.empty) throw new Error("WELCOME_POOL_UNAVAILABLE");
-      const providerRef = pool.docs[0].ref;
-      const providerData = pool.docs[0].data();
+      const providerDoc = pool.docs.find((item) => {
+        const data = item.data();
+        return data.status === "active" && Number(data.estimatedBalance ?? 0) >= WELCOME_CREDITS;
+      });
+      if (!providerDoc) {
+        if (pool.empty || !pool.docs.some((item) => item.data().status === "active")) throw new Error("WELCOME_POOL_UNAVAILABLE");
+        throw new Error("WELCOME_POOL_INSUFFICIENT");
+      }
+      const providerRef = providerDoc.ref;
+      const providerData = providerDoc.data();
       const providerBalance = Number(providerData.estimatedBalance ?? 0);
       if (providerBalance < WELCOME_CREDITS) throw new Error("WELCOME_POOL_INSUFFICIENT");
       transaction.set(walletRef, { uid: user.uid, soldeCauris: WELCOME_CREDITS, welcomeCaurisGranted: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
