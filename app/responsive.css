@@ -192,7 +192,9 @@ code {
 
 /* ---------- Téléphone ---------- */
 @media (max-width: 680px) {
-  .key-base-url code { min-width: 0; flex: 1 1 100%; }
+  .key-base-url-heading { display: grid; gap: 3px; }
+  .key-base-url-value { align-items: flex-start; }
+  .key-base-url-value code { min-width: 0; flex: 1; }
   .admin-layout,
   .admin-metrics {
     grid-template-columns: 1fr;

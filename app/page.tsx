@@ -1024,11 +1024,8 @@ function KeyPanel({ apiKey, onGenerate }: { apiKey: string | null; onGenerate: (
             </button>
           </div>
           <div className="key-base-url">
-            <span>Base URL</span>
-            <code>{baseUrl}</code>
-            <button className="icon-button" aria-label="Copier la Base URL" onClick={() => navigator.clipboard?.writeText(baseUrl)}>
-              <Copy size={15} />
-            </button>
+            <div className="key-base-url-heading"><span>Base URL</span><small>À utiliser dans votre outil ou SDK</small></div>
+            <div className="key-base-url-value"><code>{baseUrl}</code><button className="icon-button" aria-label="Copier la Base URL" onClick={() => navigator.clipboard?.writeText(baseUrl)}><Copy size={15} /></button></div>
           </div>
           <button className="primary-button" onClick={onGenerate}>
             <Plus size={15} /> Générer une nouvelle clé
