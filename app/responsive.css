@@ -288,6 +288,23 @@ code {
     padding: 0;
     justify-content: center;
   }
+  .panel {
+    padding: 18px 16px;
+  }
+  .panel-heading h2 {
+    font-size: 21px;
+  }
+  .activity-row {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+  .activity-row > b {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .usage-table-head,
+  .usage-table-row {
+    min-width: 560px;
+  }
 }
 
 @media (max-width: 400px) {

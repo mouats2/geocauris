@@ -43,6 +43,15 @@ import { firebaseAuth, firestore } from "../lib/firebase";
 import { CAURIS_PACKS } from "../lib/pricing";
 
 type Stamp = { seconds?: number } | undefined;
+function timestampSeconds(value: unknown): number {
+  if (!value) return 0;
+  if (typeof value === "object" && value !== null) {
+    const candidate = value as { seconds?: unknown; _seconds?: unknown; toMillis?: () => number };
+    if (typeof candidate.toMillis === "function") return Number(candidate.toMillis()) / 1000;
+    return Number(candidate.seconds ?? candidate._seconds ?? 0);
+  }
+  return typeof value === "number" ? (value > 10_000_000_000 ? value / 1000 : value) : 0;
+}
 type UsageLog = {
   id: string;
   model: string;
@@ -272,7 +281,7 @@ function describeFirestoreError(error: unknown, what: string) {
 }
 
 function monthIndex(stamp: Stamp) {
-  const seconds = Number(stamp?.seconds ?? 0);
+  const seconds = timestampSeconds(stamp);
   if (!seconds) return null;
   const date = new Date(seconds * 1000);
   return date.getFullYear() * 12 + date.getMonth();
@@ -332,9 +341,9 @@ function Dashboard({ user }: { user: User }) {
               id: item.id,
               model: String(data.model ?? "Imọlẹ"),
               effort: String(data.effort ?? "medium"),
-              tokensIn: Number(data.tokensEntree ?? 0),
-              tokensOut: Number(data.tokensSortie ?? 0),
-              cauris: Number(data.coutCauris ?? 0),
+              tokensIn: Number(data.tokensEntree ?? data.tokensIn ?? data.inputTokens ?? data.promptTokens ?? 0),
+              tokensOut: Number(data.tokensSortie ?? data.tokensOut ?? data.outputTokens ?? data.completionTokens ?? 0),
+              cauris: Number(data.coutCauris ?? data.cauris ?? data.costCauris ?? 0),
               createdAt: data.createdAt,
             } as UsageLog;
           }),
@@ -413,7 +422,7 @@ function Dashboard({ user }: { user: User }) {
       createdAt: log.createdAt,
     }));
     return [...txns, ...usageRows].sort(
-      (a, b) => Number(b.createdAt?.seconds ?? 0) - Number(a.createdAt?.seconds ?? 0),
+      (a, b) => timestampSeconds(b.createdAt) - timestampSeconds(a.createdAt),
     );
   }, [txns, usage]);
 
