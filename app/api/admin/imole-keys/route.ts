@@ -11,6 +11,10 @@ export async function GET(request: Request) {
   } catch (error) { console.error("imole_keys_get_failed", error); return NextResponse.json({ error: error instanceof Error ? error.message : "Firestore indisponible" }, { status: 503 }); }
 }
 
+export async function OPTIONS() {
+  return NextResponse.json({ status: "ok" });
+}
+
 export async function POST(request: Request) {
   try { await requireAdmin(request); } catch (error) { return NextResponse.json({ error: error instanceof Error && error.message === "FORBIDDEN" ? "Accès administrateur requis" : "Authentification requise" }, { status: error instanceof Error && error.message === "FORBIDDEN" ? 403 : 401 }); }
   const body = await request.json().catch(() => ({}));

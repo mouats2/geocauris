@@ -192,6 +192,13 @@ code {
 
 /* ---------- Téléphone ---------- */
 @media (max-width: 680px) {
+  .admin-layout,
+  .admin-metrics {
+    grid-template-columns: 1fr;
+  }
+  .admin-nav {
+    position: static;
+  }
   .intro {
     flex-direction: column;
     align-items: flex-start;

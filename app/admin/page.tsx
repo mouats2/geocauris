@@ -7,6 +7,7 @@ import {
   signOut,
   User,
 } from "firebase/auth";
+import { ChartLineUp, Coins, UsersThree, ShieldCheck, ActivityIcon } from "@phosphor-icons/react";
 import { AdminPanel, ImoleKey } from "../../components/AdminPanel";
 import { firebaseAuth } from "../../lib/firebase";
 
@@ -114,6 +115,8 @@ function AdminLogin() {
 function AdminWorkspace({ user }: { user: User }) {
   const [keys, setKeys] = useState<ImoleKey[]>([]);
   const [notice, setNotice] = useState("");
+  const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0 });
+  const [section, setSection] = useState<"overview" | "pool">("overview");
   const [form, setForm] = useState({
     label: "",
     rawKey: "",
@@ -132,6 +135,16 @@ function AdminWorkspace({ user }: { user: User }) {
   }
   useEffect(() => {
     refresh().catch((error) => setNotice(error.message));
+  }, [user]);
+  async function loadMetrics() {
+    const token = await user.getIdToken();
+    const response = await fetch("/api/admin/metrics", { headers: { Authorization: `Bearer ${token}` } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error ?? "Impossible de charger les métriques.");
+    setMetrics(data.metrics);
+  }
+  useEffect(() => {
+    loadMetrics().catch((error) => setNotice(error.message));
   }, [user]);
   async function add(event: FormEvent) {
     event.preventDefault();
@@ -199,14 +212,32 @@ function AdminWorkspace({ user }: { user: User }) {
             <button onClick={() => setNotice("")}>Fermer</button>
           </div>
         )}
-        <AdminPanel
-          keys={keys}
-          form={form}
-          setForm={setForm}
-          onSubmit={add}
-          onUpdate={update}
-        />
+        <div className="admin-layout">
+          <aside className="admin-nav" aria-label="Navigation administration">
+            <p className="kicker">Console privée</p>
+            <button className={section === "overview" ? "selected" : ""} onClick={() => setSection("overview")}><ChartLineUp size={18} /> Vue plateforme</button>
+            <button className={section === "pool" ? "selected" : ""} onClick={() => setSection("pool")}><ShieldCheck size={18} /> Pool Imọlẹ</button>
+            <button onClick={() => loadMetrics().catch((error) => setNotice(error.message))}><ActivityIcon size={18} /> Actualiser</button>
+          </aside>
+          <div className="admin-content">
+            {section === "overview" ? <AdminOverview metrics={metrics} keys={keys} /> : <AdminPanel keys={keys} form={form} setForm={setForm} onSubmit={add} onUpdate={update} />}
+          </div>
+        </div>
       </div>
     </main>
   );
+}
+
+function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: number; cauris: number; transactions: number }; keys: ImoleKey[] }) {
+  const poolBalance = keys.reduce((sum, key) => sum + Number(key.estimatedBalance || 0), 0);
+  return <section className="admin-overview">
+    <div className="route-header"><div><p className="kicker">Supervision</p><h2>Vue de la plateforme</h2><p>Suivez l’utilisation globale, les comptes actifs et les réserves de cauris disponibles.</p></div><span className="active-badge"><span className="online" /> Système opérationnel</span></div>
+    <div className="admin-metrics">
+      <article className="panel"><UsersThree size={22} /><small>Utilisateurs enregistrés</small><strong>{metrics.users.toLocaleString("fr-FR")}</strong></article>
+      <article className="panel"><ActivityIcon size={22} /><small>Requêtes IA enregistrées</small><strong>{metrics.usage.toLocaleString("fr-FR")}</strong></article>
+      <article className="panel"><Coins size={22} /><small>Cauris consommés</small><strong>{metrics.cauris.toLocaleString("fr-FR")}</strong></article>
+      <article className="panel"><ChartLineUp size={22} /><small>Transactions</small><strong>{metrics.transactions.toLocaleString("fr-FR")}</strong></article>
+    </div>
+    <section className="panel admin-summary"><h2>Réserve Imọlẹ disponible</h2><strong>{poolBalance.toLocaleString("fr-FR")} cauris</strong><p>Total estimé de toutes les clés actives du pool. Les soldes utilisateurs et les opérations financières restent protégés côté serveur.</p></section>
+  </section>;
 }
