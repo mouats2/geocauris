@@ -35,9 +35,10 @@ export async function POST(request: Request) {
   });
   const raw = await upstream.text();
   if (!upstream.ok) {
-    let error: unknown = { message: raw || "Erreur du fournisseur IA", type: "upstream_error" };
-    try { error = JSON.parse(raw).error ?? error; } catch { /* réponse non JSON */ }
-    return NextResponse.json({ error }, { status: upstream.status });
+    let upstreamError: any = null;
+    try { upstreamError = JSON.parse(raw); } catch { /* réponse non JSON */ }
+    const providerMessage = upstreamError?.error?.message ?? upstreamError?.message ?? raw;
+    return NextResponse.json({ error: { message: providerMessage || "Erreur du fournisseur IA", type: "upstream_error", provider_status: upstream.status } }, { status: upstream.status });
   }
   let payload: any;
   try { payload = JSON.parse(raw); } catch { return NextResponse.json({ error: { message: "Réponse fournisseur invalide", type: "upstream_error" } }, { status: 502 }); }
