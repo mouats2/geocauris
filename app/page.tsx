@@ -298,6 +298,7 @@ function Dashboard({ user }: { user: User }) {
   const [notice, setNotice] = useState<{ text: string; kind: "success" | "error" } | null>(null);
   const [dataError, setDataError] = useState("");
   const [showBuy, setShowBuy] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buying, setBuying] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(null);
@@ -360,6 +361,13 @@ function Dashboard({ user }: { user: User }) {
       cancelled = true;
     };
   }, [user.uid]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paiement") === "retour") {
+      setPaymentConfirmed(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   // Toutes les métriques ci-dessous proviennent uniquement des documents
   // usageLogs réellement présents dans Firestore — aucune valeur simulée.
@@ -549,9 +557,14 @@ function Dashboard({ user }: { user: User }) {
           {active === "Administration" && <AdminNotice />}
         </div>
         {showBuy && <BuyModal onClose={() => setShowBuy(false)} buying={buying} onBuy={buy} />}
+        {paymentConfirmed && <PaymentConfirmation onClose={() => setPaymentConfirmed(false)} />}
       </div>
     </main>
   );
+}
+
+function PaymentConfirmation({ onClose }: { onClose: () => void }) {
+  return <div className="modal-backdrop"><div className="modal-card payment-confirmation" role="dialog" aria-modal="true" aria-labelledby="payment-confirmed-title"><span className="payment-confirmation-icon"><Check size={25} /></span><h2 id="payment-confirmed-title">Paiement confirmé</h2><p>Votre paiement a été reçu. Le crédit de votre wallet sera actualisé dès la confirmation finale de SasPay.</p><button className="primary-button" onClick={onClose}>OK</button></div></div>;
 }
 
 function Sidebar({

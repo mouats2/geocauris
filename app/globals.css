@@ -503,6 +503,11 @@ input:focus-visible,
 .key-base-url-value { min-width:0; display:flex; align-items:center; gap:10px; padding:10px 10px 10px 12px; background:#fff; border:1px solid #dce6d8; border-radius:8px; }
 .key-base-url-value code { min-width:0; flex:1; color:var(--forest); font-size:11px; line-height:1.45; overflow-wrap:anywhere; word-break:break-word; }
 .key-base-url-value .icon-button { flex:0 0 34px; width:34px; height:34px; }
+.payment-confirmation { max-width:420px; text-align:center; }
+.payment-confirmation-icon { width:52px; height:52px; margin:0 auto 16px; display:grid; place-items:center; border-radius:50%; background:#e5f4e8; color:#39734f; }
+.payment-confirmation h2 { margin:0; color:var(--forest); }
+.payment-confirmation p { color:var(--muted); line-height:1.55; }
+.payment-confirmation .primary-button { margin-top:12px; min-width:120px; }
 .route-panel {
   margin: 0 0 26px;
   padding: 30px;
