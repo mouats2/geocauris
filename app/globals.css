@@ -489,10 +489,12 @@ input:focus-visible,
 }
 .notice-success {
   background: #e5f4e8;
-  border-color: #b9ddc0;
+  border: 1px solid #8bc69a;
   color: #39734f;
 }
 .notice-success button { color: #39734f; }
+.notice.notice-success { background: #e5f4e8 !important; border-color: #8bc69a !important; color: #39734f !important; }
+.notice.notice-success button { color: #39734f !important; }
 .notice-error { color: #8c583a; }
 .route-panel {
   margin: 0 0 26px;
