@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       model,
       input: textFromMessages(body.messages),
-      reasoning_effort: body.reasoning_effort ?? "medium",
+      reasoning: { effort: body.reasoning?.effort ?? body.reasoning_effort ?? "medium" },
     }),
   });
   const raw = await upstream.text();
