@@ -487,6 +487,13 @@ input:focus-visible,
   background: none;
   text-decoration: underline;
 }
+.notice-success {
+  background: #e5f4e8;
+  border-color: #b9ddc0;
+  color: #39734f;
+}
+.notice-success button { color: #39734f; }
+.notice-error { color: #8c583a; }
 .route-panel {
   margin: 0 0 26px;
   padding: 30px;

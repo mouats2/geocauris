@@ -114,7 +114,8 @@ function AdminLogin() {
 
 function AdminWorkspace({ user }: { user: User }) {
   const [keys, setKeys] = useState<ImoleKey[]>([]);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<{ text: string; kind: "success" | "error" } | null>(null);
+  const reportError = (error: unknown, fallback: string) => setNotice({ text: error instanceof Error ? error.message : fallback, kind: "error" });
   const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0 });
   const [section, setSection] = useState<"overview" | "pool">("overview");
   const [form, setForm] = useState({
@@ -134,7 +135,7 @@ function AdminWorkspace({ user }: { user: User }) {
     setKeys(data.keys ?? []);
   }
   useEffect(() => {
-    refresh().catch((error) => setNotice(error.message));
+    refresh().catch((error) => reportError(error, "Impossible de charger les clés."));
   }, [user]);
   async function loadMetrics() {
     const token = await user.getIdToken();
@@ -144,7 +145,7 @@ function AdminWorkspace({ user }: { user: User }) {
     setMetrics(data.metrics);
   }
   useEffect(() => {
-    loadMetrics().catch((error) => setNotice(error.message));
+    loadMetrics().catch((error) => reportError(error, "Impossible de charger les métriques."));
   }, [user]);
   async function add(event: FormEvent) {
     event.preventDefault();
@@ -163,16 +164,16 @@ function AdminWorkspace({ user }: { user: User }) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setNotice(data.error ?? "Impossible d’ajouter la clé.");
+      setNotice({ text: data.error ?? "Impossible d’ajouter la clé.", kind: "error" });
       return;
     }
     setForm({ label: "", rawKey: "", startingBalance: "", alertThreshold: "" });
-    setNotice("Clé ajoutée dans le pool sécurisé.");
+    setNotice({ text: "Clé ajoutée dans le pool sécurisé.", kind: "success" });
     await refresh();
   }
   async function update(
     id: string,
-    action: "recharge" | "toggle",
+    action: "recharge" | "reset" | "toggle",
     amount?: number,
   ) {
     const token = await user.getIdToken();
@@ -186,10 +187,10 @@ function AdminWorkspace({ user }: { user: User }) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setNotice(data.error ?? "Impossible de mettre à jour la clé.");
+      setNotice({ text: data.error ?? "Impossible de mettre à jour la clé.", kind: "error" });
       return;
     }
-    setNotice("Clé mise à jour.");
+    setNotice({ text: "Clé mise à jour.", kind: "success" });
     await refresh();
   }
   return (
@@ -207,9 +208,9 @@ function AdminWorkspace({ user }: { user: User }) {
       </header>
       <div className="page">
         {notice && (
-          <div className="notice">
-            {notice}
-            <button onClick={() => setNotice("")}>Fermer</button>
+          <div className={`notice ${notice.kind === "success" ? "notice-success" : "notice-error"}`}>
+            {notice.text}
+            <button onClick={() => setNotice(null)}>Fermer</button>
           </div>
         )}
         <div className="admin-layout">
@@ -217,7 +218,7 @@ function AdminWorkspace({ user }: { user: User }) {
             <p className="kicker">Console privée</p>
             <button className={section === "overview" ? "selected" : ""} onClick={() => setSection("overview")}><ChartLineUp size={18} /> Vue plateforme</button>
             <button className={section === "pool" ? "selected" : ""} onClick={() => setSection("pool")}><ShieldCheck size={18} /> Pool Imọlẹ</button>
-            <button onClick={() => loadMetrics().catch((error) => setNotice(error.message))}><ActivityIcon size={18} /> Actualiser</button>
+            <button onClick={() => loadMetrics().catch((error) => reportError(error, "Impossible d’actualiser les métriques."))}><ActivityIcon size={18} /> Actualiser</button>
           </aside>
           <div className="admin-content">
             {section === "overview" ? <AdminOverview metrics={metrics} keys={keys} /> : <AdminPanel keys={keys} form={form} setForm={setForm} onSubmit={add} onUpdate={update} />}

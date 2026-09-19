@@ -293,7 +293,7 @@ function Dashboard({ user }: { user: User }) {
   const [usage, setUsage] = useState<UsageLog[]>([]);
   const [txns, setTxns] = useState<Txn[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<{ text: string; kind: "success" | "error" } | null>(null);
   const [dataError, setDataError] = useState("");
   const [showBuy, setShowBuy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -428,7 +428,7 @@ function Dashboard({ user }: { user: User }) {
 
   async function buy(packId: string) {
     setBuying(packId);
-    setNotice("");
+    setNotice(null);
     try {
       const token = await user.getIdToken();
       const response = await fetch("/api/payments/saspay", {
@@ -441,7 +441,7 @@ function Dashboard({ user }: { user: User }) {
         throw new Error(data.error ?? "Lien SasPay indisponible");
       window.location.assign(data.paymentUrl);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Impossible de contacter SasPay.");
+      setNotice({ text: error instanceof Error ? error.message : "Impossible de contacter SasPay.", kind: "error" });
     } finally {
       setBuying(null);
     }
@@ -458,7 +458,7 @@ function Dashboard({ user }: { user: User }) {
       setApiKey(data.key);
       setActive("Ma clé API");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Impossible de générer la clé.");
+      setNotice({ text: error instanceof Error ? error.message : "Impossible de générer la clé.", kind: "error" });
     }
   }
   function navigate(page: string) {
@@ -519,9 +519,9 @@ function Dashboard({ user }: { user: User }) {
             </div>
           )}
           {notice && (
-            <div className="notice" role="alert">
-              {notice}
-              <button onClick={() => setNotice("")} aria-label="Fermer">
+            <div className={`notice ${notice.kind === "success" ? "notice-success" : "notice-error"}`} role="alert">
+              {notice.text}
+              <button onClick={() => setNotice(null)} aria-label="Fermer">
                 <X size={15} />
               </button>
             </div>

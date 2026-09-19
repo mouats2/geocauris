@@ -30,11 +30,15 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try { await requireAdmin(request); } catch (error) { return NextResponse.json({ error: error instanceof Error && error.message === "FORBIDDEN" ? "Accès administrateur requis" : "Authentification requise" }, { status: error instanceof Error && error.message === "FORBIDDEN" ? 403 : 401 }); }
   const body = await request.json().catch(() => ({}));
-  if (!body.id || !["recharge", "toggle"].includes(body.action)) return NextResponse.json({ error: "id et action sont obligatoires" }, { status: 400 });
+  if (!body.id || !["recharge", "reset", "toggle"].includes(body.action)) return NextResponse.json({ error: "id et action sont obligatoires" }, { status: 400 });
   const ref = adminFirestoreOnly().collection("imoleKeys").doc(String(body.id));
   const snapshot = await ref.get();
   if (!snapshot.exists) return NextResponse.json({ error: "Clé Imọlẹ introuvable" }, { status: 404 });
   const data = snapshot.data() ?? {};
+  if (body.action === "reset") {
+    await ref.update({ estimatedBalance: 0, status: "exhausted", updatedAt: FieldValue.serverTimestamp() });
+    return NextResponse.json({ status: "reset" });
+  }
   if (body.action === "recharge") {
     const amount = Number(body.amount);
     if (!Number.isFinite(amount) || amount <= 0) return NextResponse.json({ error: "Le montant de recharge doit être positif" }, { status: 400 });
