@@ -1,0 +1,330 @@
+/*
+ * Feuille responsive GeoCauris.
+ * Importée en dernier dans layout.tsx : elle doit pouvoir corriger les
+ * sélecteurs plus spécifiques de dashboard.css (.app-main .dashboard-lower)
+ * que les media queries de globals.css n'arrivaient pas à surcharger.
+ */
+
+/* ---------- Base : rien ne doit déborder horizontalement ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overflow-x: hidden;
+}
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+pre,
+code {
+  overflow-x: auto;
+  word-break: break-word;
+}
+.page,
+.panel,
+.app-main,
+.sidebar,
+.wide-panel {
+  min-width: 0;
+}
+
+/* Le menu mobile n'existe qu'en dessous de 900px. */
+.menu-toggle,
+.menu-scrim {
+  display: none;
+}
+
+/* ---------- Grand écran : on élargit au lieu de laisser du vide ---------- */
+@media (min-width: 1600px) {
+  .app-main .page {
+    max-width: 1560px;
+  }
+}
+
+/* ---------- Ordinateur portable ---------- */
+@media (max-width: 1180px) {
+  .app-main .dashboard-lower,
+  .balance-grid {
+    grid-template-columns: 1.25fr 0.75fr;
+  }
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- Tablette ---------- */
+@media (max-width: 1024px) {
+  .app-main .dashboard-lower,
+  .dashboard-lower,
+  .dashboard-grid,
+  .balance-grid {
+    grid-template-columns: 1fr;
+  }
+  .quote-card {
+    min-height: 0;
+  }
+  .help-cards {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: none;
+  }
+  .usage-summary {
+    align-self: stretch;
+  }
+}
+
+/* ---------- Sous 900px : barre latérale en tiroir ---------- */
+@media (max-width: 900px) {
+  .app-shell {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .menu-toggle {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    margin-right: 4px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--forest);
+  }
+  .menu-toggle:hover {
+    background: #edf1ea;
+  }
+
+  /* Le tiroir glisse depuis la gauche et reste accessible au clavier. */
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    width: min(82vw, 290px);
+    flex-basis: auto;
+    height: 100%;
+    padding: 16px 14px;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    transform: translateX(-102%);
+    transition: transform 0.24s ease;
+  }
+  .menu-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 0 22px 60px rgba(25, 56, 44, 0.22);
+  }
+
+  .menu-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(25, 56, 44, 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+  }
+  .menu-open .menu-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Dans le tiroir, la navigation reste verticale et lisible :
+     on annule l'ancien repli en icônes seules. */
+  .sidebar-nav {
+    display: grid;
+    gap: 3px;
+    overflow: visible;
+  }
+  .sidebar-nav button {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .sidebar-nav button span {
+    display: inline;
+  }
+  .account-card,
+  .sidebar-label,
+  .sidebar-spacer,
+  .sidebar-balance,
+  .sidebar-user {
+    display: revert;
+  }
+  .sidebar-spacer {
+    flex: none;
+    height: 18px;
+  }
+
+  .app-main {
+    width: 100%;
+  }
+  .app-main .topbar {
+    height: 62px;
+    min-height: 62px;
+    padding: 0 14px;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(246, 247, 241, 0.94);
+    backdrop-filter: blur(8px);
+  }
+  .breadcrumb {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar-actions {
+    margin-left: auto;
+  }
+  .app-main .page {
+    padding: 24px 14px 48px;
+  }
+}
+
+/* ---------- Téléphone ---------- */
+@media (max-width: 680px) {
+  .intro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .intro h1 {
+    font-size: clamp(26px, 7vw, 34px);
+  }
+  .service {
+    align-self: flex-start;
+  }
+
+  .app-main .balance-card {
+    min-height: 0;
+    padding: 22px 20px 74px;
+  }
+  .app-main .balance-number {
+    font-size: 38px;
+  }
+  .balance-foot {
+    left: 20px;
+    right: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .stat-tile small {
+    font-size: 8.5px;
+    line-height: 1.35;
+  }
+
+  /* Le donut passe au-dessus de sa légende. */
+  .usage-preview-body {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .usage-legend {
+    width: 100%;
+  }
+
+  .help-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Le tableau garde ses colonnes mais défile dans son propre conteneur. */
+  .usage-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .usage-table-head,
+  .usage-table-row {
+    min-width: 600px;
+  }
+
+  .modal-card {
+    width: 100%;
+    padding: 22px 18px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .buy-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .key-box {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .key-box code {
+    flex: 1 1 100%;
+    font-size: 8.5px;
+  }
+
+  /* Cibles tactiles confortables. */
+  .primary-button,
+  .outline-button,
+  .topbar-buy,
+  .buy-option,
+  .sidebar-balance button {
+    min-height: 42px;
+  }
+  /* Sur écran étroit le bouton d'achat se réduit à son icône. */
+  .topbar-buy span {
+    display: none;
+  }
+  .topbar-buy {
+    width: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+  .buy-grid {
+    grid-template-columns: 1fr;
+  }
+  .app-main .page {
+    padding: 20px 11px 40px;
+  }
+}
+
+/* ---------- Écran d'authentification ---------- */
+@media (max-width: 900px) {
+  .auth-shell {
+    display: block;
+    padding: 24px 16px 40px;
+  }
+  .auth-aside {
+    display: none;
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .auth-foot {
+    text-align: center;
+  }
+}
+
+/* ---------- Respect des préférences système ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .menu-scrim {
+    transition: none;
+  }
+}
