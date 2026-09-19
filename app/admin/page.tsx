@@ -116,7 +116,7 @@ function AdminWorkspace({ user }: { user: User }) {
   const [keys, setKeys] = useState<ImoleKey[]>([]);
   const [notice, setNotice] = useState<{ text: string; kind: "success" | "error" } | null>(null);
   const reportError = (error: unknown, fallback: string) => setNotice({ text: error instanceof Error ? error.message : fallback, kind: "error" });
-  const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0, walletCount: 0 });
+  const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0, walletCount: 0, revenue: 0, purchases: [] as { id: string; uid: string; label: string; cauris: number; amountXof: number; createdAt: string | null }[] });
   const [section, setSection] = useState<"overview" | "pool">("overview");
   const [form, setForm] = useState({
     label: "",
@@ -229,7 +229,7 @@ function AdminWorkspace({ user }: { user: User }) {
   );
 }
 
-function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: number; cauris: number; transactions: number; walletCount: number }; keys: ImoleKey[] }) {
+function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: number; cauris: number; transactions: number; walletCount: number; revenue: number; purchases: { id: string; uid: string; label: string; cauris: number; amountXof: number; createdAt: string | null }[] }; keys: ImoleKey[] }) {
   const poolBalance = keys.reduce((sum, key) => sum + Number(key.estimatedBalance || 0), 0);
   return <section className="admin-overview">
     <div className="route-header"><div><p className="kicker">Supervision</p><h2>Vue de la plateforme</h2><p>Suivez l’utilisation globale, les comptes actifs et les réserves de cauris disponibles.</p></div><span className="active-badge"><span className="online" /> Système opérationnel</span></div>
@@ -238,7 +238,9 @@ function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: num
       <article className="panel"><ActivityIcon size={22} /><small>Requêtes IA enregistrées</small><strong>{metrics.usage.toLocaleString("fr-FR")}</strong></article>
       <article className="panel"><Coins size={22} /><small>Cauris consommés</small><strong>{metrics.cauris.toLocaleString("fr-FR")}</strong></article>
       <article className="panel"><ChartLineUp size={22} /><small>Transactions</small><strong>{metrics.transactions.toLocaleString("fr-FR")}</strong></article>
+      <article className="panel"><Coins size={22} /><small>Chiffre d’affaires</small><strong>{metrics.revenue.toLocaleString("fr-FR")} FCFA</strong></article>
     </div>
-    <section className="panel admin-summary"><h2>Réserve Imọlẹ disponible</h2><strong>{poolBalance.toLocaleString("fr-FR")} cauris</strong><p>Total estimé de toutes les clés actives du pool. Les soldes utilisateurs et les opérations financières restent protégés côté serveur.</p></section>
+    <section className="panel admin-summary"><h2>Réserve Imọlẹ disponible</h2><strong>{poolBalance.toLocaleString("fr-FR")} cauris</strong><p>Total estimé de toutes les clés actives du pool.</p></section>
+    <section className="panel admin-summary"><h2>Historique des achats</h2>{metrics.purchases.length ? <div className="admin-purchases">{metrics.purchases.map((purchase) => <div className="admin-purchase-row" key={purchase.id}><div><strong>{purchase.label}</strong><small>{purchase.uid}</small></div><span>{purchase.cauris.toLocaleString("fr-FR")} cauris</span><b>{purchase.amountXof.toLocaleString("fr-FR")} FCFA</b><time>{purchase.createdAt ? new Date(purchase.createdAt).toLocaleString("fr-FR") : "Date indisponible"}</time></div>)}</div> : <p>Aucun achat confirmé dans Firestore.</p>}</section>
   </section>;
 }

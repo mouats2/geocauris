@@ -323,6 +323,13 @@
 .admin-summary { margin-top:18px; }
 .admin-summary strong { display:block; margin-top:16px; color:var(--forest); font-size:42px; letter-spacing:-.07em; }
 .admin-summary p { color:var(--muted); line-height:1.55; }
+.admin-purchases { display:grid; gap:8px; margin-top:16px; }
+.admin-purchase-row { display:grid; grid-template-columns:minmax(0,1.4fr) auto auto minmax(150px,auto); gap:14px; align-items:center; padding:13px 0; border-top:1px solid #edf1eb; font-size:12px; }
+.admin-purchase-row div { display:grid; gap:4px; min-width:0; }
+.admin-purchase-row small, .admin-purchase-row time { color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.admin-purchase-row span { color:var(--forest); }
+.admin-purchase-row b { color:#39734f; white-space:nowrap; }
+@media (max-width: 720px) { .admin-purchase-row { grid-template-columns:1fr 1fr; } .admin-purchase-row time { grid-column:1 / -1; } }
 @media (max-width: 900px) {
   .sidebar {
     width: 205px;
