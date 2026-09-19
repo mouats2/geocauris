@@ -18,31 +18,17 @@ export async function POST(request: Request) {
     await db.runTransaction(async (transaction) => {
       const welcome = await transaction.get(reservationRef);
       const wallet = await transaction.get(walletRef);
-      const pool = await transaction.get(db.collection("imoleKeys").limit(20));
       if (welcome.exists || wallet.data()?.welcomeCaurisGranted === true) return;
-      const providerDoc = pool.docs.find((item) => {
-        const data = item.data();
-        return data.status === "active" && Number(data.estimatedBalance ?? 0) >= WELCOME_CREDITS;
-      });
-      if (!providerDoc) {
-        if (pool.empty || !pool.docs.some((item) => item.data().status === "active")) throw new Error("WELCOME_POOL_UNAVAILABLE");
-        throw new Error("WELCOME_POOL_INSUFFICIENT");
-      }
-      const providerRef = providerDoc.ref;
-      const providerData = providerDoc.data();
-      const providerBalance = Number(providerData.estimatedBalance ?? 0);
-      if (providerBalance < WELCOME_CREDITS) throw new Error("WELCOME_POOL_INSUFFICIENT");
+      if (!process.env.IMOLE_MASTER_API_KEY) throw new Error("WELCOME_MASTER_KEY_MISSING");
       transaction.set(walletRef, { uid: user.uid, soldeCauris: WELCOME_CREDITS, welcomeCaurisGranted: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      transaction.update(providerRef, { estimatedBalance: providerBalance - WELCOME_CREDITS, updatedAt: FieldValue.serverTimestamp() });
-      transaction.set(reservationRef, { uid: user.uid, cauris: WELCOME_CREDITS, providerKeyId: providerRef.id, createdAt: FieldValue.serverTimestamp() });
+      transaction.set(reservationRef, { uid: user.uid, cauris: WELCOME_CREDITS, source: "IMOLE_MASTER_API_KEY", createdAt: FieldValue.serverTimestamp() });
       transaction.set(db.collection("transactions").doc(), { uid: user.uid, type: "credit", label: "Bonus de bienvenue", model: "GeoCauris", cauris: WELCOME_CREDITS, source: "welcome", createdAt: FieldValue.serverTimestamp() });
       transaction.set(userRef, { welcomeCaurisGranted: true }, { merge: true });
     });
     return NextResponse.json({ granted: true, cauris: WELCOME_CREDITS });
   } catch (error) {
     const code = error instanceof Error ? error.message : "";
-    if (code === "WELCOME_POOL_INSUFFICIENT") return NextResponse.json({ error: "Le bonus de bienvenue est temporairement indisponible." }, { status: 503 });
-    if (code === "WELCOME_POOL_UNAVAILABLE") return NextResponse.json({ error: "Aucune réserve Imọlẹ active n'est configurée." }, { status: 503 });
+    if (code === "WELCOME_MASTER_KEY_MISSING") return NextResponse.json({ error: "La clé maître Imọlẹ (IMOLE_MASTER_API_KEY) n'est pas configurée sur le serveur." }, { status: 503 });
     console.error("welcome_credit_failed", { code, uid: user.uid });
     return NextResponse.json({ error: "Impossible d'activer le bonus de bienvenue. Vérifiez les variables Firebase Admin et la réserve Imọlẹ active." }, { status: 503 });
   }
