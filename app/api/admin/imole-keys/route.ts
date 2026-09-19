@@ -18,10 +18,10 @@ export async function OPTIONS() {
 export async function POST(request: Request) {
   try { await requireAdmin(request); } catch (error) { return NextResponse.json({ error: error instanceof Error && error.message === "FORBIDDEN" ? "Accès administrateur requis" : "Authentification requise" }, { status: error instanceof Error && error.message === "FORBIDDEN" ? 403 : 401 }); }
   const body = await request.json().catch(() => ({}));
-  if (!body.rawKey || !body.label || Number(body.startingBalance) <= 0) return NextResponse.json({ error: "label, rawKey et startingBalance sont obligatoires" }, { status: 400 });
+  if (!body.rawKey || !body.label || !Number.isFinite(Number(body.startingBalance)) || Number(body.startingBalance) < 0) return NextResponse.json({ error: "label, rawKey et startingBalance sont obligatoires" }, { status: 400 });
   try {
     const startingBalance = Number(body.startingBalance);
-    const alertThreshold = Number(body.alertThreshold ?? Math.round(startingBalance * 0.1));
+    const alertThreshold = Number(body.alertThreshold ?? 0);
     const ref = await adminFirestoreOnly().collection("imoleKeys").add({ label: body.label, encryptedKey: encryptSecret(body.rawKey), status: "active", startingBalance, estimatedBalance: startingBalance, alertThreshold, lastAlertAt: null, lastRechargeAt: FieldValue.serverTimestamp(), createdAt: FieldValue.serverTimestamp() });
     return NextResponse.json({ id: ref.id, status: "created" }, { status: 201 });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Impossible de chiffrer la clé" }, { status: 503 }); }
