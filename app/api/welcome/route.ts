@@ -16,11 +16,9 @@ export async function POST(request: Request) {
   const reservationRef = db.collection("welcomeCredits").doc(user.uid);
   try {
     await db.runTransaction(async (transaction) => {
-      const [welcome, wallet, pool] = await Promise.all([
-        transaction.get(reservationRef),
-        transaction.get(walletRef),
-        transaction.get(db.collection("imoleKeys").where("status", "==", "active").limit(1)),
-      ]);
+      const welcome = await transaction.get(reservationRef);
+      const wallet = await transaction.get(walletRef);
+      const pool = await transaction.get(db.collection("imoleKeys").where("status", "==", "active").limit(1));
       if (welcome.exists || wallet.data()?.welcomeCaurisGranted === true) return;
       if (pool.empty) throw new Error("WELCOME_POOL_UNAVAILABLE");
       const providerRef = pool.docs[0].ref;
