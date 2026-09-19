@@ -7,6 +7,7 @@ import {
   BookOpen,
   Check,
   ChartLineUp,
+  ChatCircleDots,
   Coin,
   Copy,
   Key,
@@ -76,7 +77,7 @@ const nav = [
   { label: "Consommation", icon: ChartLineUp },
   { label: "Ma clé API", icon: Key },
   { label: "Documentation", icon: BookOpen },
-  { label: "Centre d’aide", icon: BookOpen },
+  { label: "Centre d’aide", icon: ChatCircleDots },
 ];
 
 const SLICE_COLORS = ["#19382c", "#c9ee73", "#ec8c55", "#7fa357", "#b7c7ba"];
