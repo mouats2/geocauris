@@ -346,6 +346,14 @@ input:focus-visible,
   font-size: 20px;
   box-shadow: 0 8px 18px rgba(23, 61, 51, 0.16);
 }
+.brand-logo-image {
+  width: 29px;
+  height: 29px;
+  display: block;
+  flex: 0 0 29px;
+  object-fit: contain;
+  border-radius: 8px;
+}
 .wordmark-dot {
   color: var(--orange);
 }

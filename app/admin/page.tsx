@@ -68,7 +68,7 @@ function AdminLogin() {
   return (
     <main className="auth-shell">
       <div className="auth-brand">
-        <span className="wordmark-mark">G</span>
+        <img className="brand-logo-image" src="/logo-geocauris.jpeg" alt="GeoCauris" />
         <strong>GeoCauris · Admin</strong>
       </div>
       <section className="auth-card">
@@ -196,7 +196,7 @@ function AdminWorkspace({ user }: { user: User }) {
     <main className="app-shell">
       <header className="topbar">
         <a className="wordmark" href="/admin">
-          <span className="wordmark-mark">G</span>
+          <img className="brand-logo-image" src="/logo-geocauris.jpeg" alt="GeoCauris" />
           <span>GeoCauris · Admin</span>
         </a>
         <div className="profile">

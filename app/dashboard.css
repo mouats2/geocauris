@@ -301,6 +301,14 @@
 .app-main .dashboard-lower {
   grid-template-columns: 1.35fr 0.65fr;
 }
+.sidebar-logo-image {
+  width: 25px;
+  height: 25px;
+  display: block;
+  flex: 0 0 25px;
+  object-fit: contain;
+  border-radius: 7px;
+}
 .admin-layout { display:grid; grid-template-columns:220px minmax(0,1fr); gap:20px; align-items:start; width:100%; }
 .admin-nav { position:sticky; top:95px; display:grid; gap:7px; padding:18px; background:#fff; border:1px solid var(--line); border-radius:16px; }
 .admin-nav button { display:flex; align-items:center; gap:9px; min-height:42px; padding:0 11px; border-radius:8px; background:transparent; color:#718078; text-align:left; font-size:12px; font-weight:700; }

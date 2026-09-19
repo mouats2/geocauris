@@ -159,7 +159,7 @@ function AuthScreen() {
     <main className="auth-shell">
       <aside className="auth-aside">
         <div className="auth-brand">
-          <span className="wordmark-mark">G</span>
+          <img className="brand-logo-image" src="/logo-geocauris.jpeg" alt="GeoCauris" />
           <strong>
             GeoCauris<span className="wordmark-dot">.</span>
           </strong>
@@ -570,9 +570,7 @@ function Sidebar({
   return (
     <aside className="sidebar">
       <a className="sidebar-brand" href="#top">
-        <span className="sidebar-logo">
-          <span /> <span /> <span />
-        </span>
+          <img className="sidebar-logo-image" src="/logo-geocauris.jpeg" alt="" />
         <strong>GeoCauris</strong>
       </a>
       <button className="account-card" type="button">
