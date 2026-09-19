@@ -116,7 +116,7 @@ function AdminWorkspace({ user }: { user: User }) {
   const [keys, setKeys] = useState<ImoleKey[]>([]);
   const [notice, setNotice] = useState<{ text: string; kind: "success" | "error" } | null>(null);
   const reportError = (error: unknown, fallback: string) => setNotice({ text: error instanceof Error ? error.message : fallback, kind: "error" });
-  const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0 });
+  const [metrics, setMetrics] = useState({ users: 0, usage: 0, cauris: 0, transactions: 0, walletCount: 0 });
   const [section, setSection] = useState<"overview" | "pool">("overview");
   const [form, setForm] = useState({
     label: "",
@@ -229,7 +229,7 @@ function AdminWorkspace({ user }: { user: User }) {
   );
 }
 
-function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: number; cauris: number; transactions: number }; keys: ImoleKey[] }) {
+function AdminOverview({ metrics, keys }: { metrics: { users: number; usage: number; cauris: number; transactions: number; walletCount: number }; keys: ImoleKey[] }) {
   const poolBalance = keys.reduce((sum, key) => sum + Number(key.estimatedBalance || 0), 0);
   return <section className="admin-overview">
     <div className="route-header"><div><p className="kicker">Supervision</p><h2>Vue de la plateforme</h2><p>Suivez l’utilisation globale, les comptes actifs et les réserves de cauris disponibles.</p></div><span className="active-badge"><span className="online" /> Système opérationnel</span></div>
