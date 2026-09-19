@@ -18,13 +18,20 @@ export async function POST(request: Request) {
   if (!body || body.stream === true) return NextResponse.json({ error: { message: body?.stream ? "Le streaming sera activé après validation du débit final." : "Corps JSON invalide", type: "invalid_request_error" } }, { status: 400 });
 
   const db = adminFirestoreOnly();
-  const activePool = await db.collection("imoleKeys").where("status", "==", "active").limit(1).get();
   let providerKey = process.env.IMOLE_MASTER_API_KEY;
-  let providerKeyRef = activePool.empty ? null : activePool.docs[0];
-  if (providerKeyRef) {
-    try { providerKey = decryptSecret(String(providerKeyRef.data().encryptedKey)); } catch { return NextResponse.json({ error: { message: "La clé Imọlẹ active ne peut pas être déchiffrée", type: "configuration_error" } }, { status: 503 }); }
+  let providerKeyRef = null;
+  if (process.env.IMOLE_USE_KEY_POOL === "true") {
+    const activePool = await db.collection("imoleKeys").where("status", "==", "active").limit(1).get();
+    providerKeyRef = activePool.empty ? null : activePool.docs[0];
+    if (providerKeyRef) {
+      try {
+        providerKey = decryptSecret(String(providerKeyRef.data().encryptedKey));
+      } catch {
+        return NextResponse.json({ error: { message: "La clé Imọlẹ active ne peut pas être déchiffrée", type: "configuration_error" } }, { status: 503 });
+      }
+    }
   }
-  if (!providerKey) return NextResponse.json({ error: { message: "Aucune clé Imọlẹ active n'est configurée", type: "configuration_error" } }, { status: 503 });
+  if (!providerKey) return NextResponse.json({ error: { message: "IMOLE_MASTER_API_KEY n'est pas configurée côté serveur", type: "configuration_error" } }, { status: 503 });
   const keyHash = crypto.createHash("sha256").update(auth.slice(7)).digest("hex");
   const keySnapshot = await db.collection("apiKeys").where("hash", "==", keyHash).limit(1).get();
   if (keySnapshot.empty) return NextResponse.json({ error: { message: "Clé API GeoCauris inconnue", type: "authentication_error" } }, { status: 401 });
