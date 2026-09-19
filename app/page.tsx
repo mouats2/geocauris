@@ -984,6 +984,7 @@ function Usage({
 
 function KeyPanel({ apiKey, onGenerate }: { apiKey: string | null; onGenerate: () => void }) {
   const [show, setShow] = useState(false);
+  const baseUrl = `${(process.env.NEXT_PUBLIC_APP_URL ?? "https://geocauris.vercel.app").replace(/\/$/, "")}/api/proxy`;
   return (
     <>
       <section className="intro">
@@ -1019,6 +1020,13 @@ function KeyPanel({ apiKey, onGenerate }: { apiKey: string | null; onGenerate: (
                 if (apiKey) navigator.clipboard?.writeText(apiKey);
               }}
             >
+              <Copy size={15} />
+            </button>
+          </div>
+          <div className="key-base-url">
+            <span>Base URL</span>
+            <code>{baseUrl}</code>
+            <button className="icon-button" aria-label="Copier la Base URL" onClick={() => navigator.clipboard?.writeText(baseUrl)}>
               <Copy size={15} />
             </button>
           </div>

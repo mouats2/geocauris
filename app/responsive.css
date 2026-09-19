@@ -192,6 +192,7 @@ code {
 
 /* ---------- Téléphone ---------- */
 @media (max-width: 680px) {
+  .key-base-url code { min-width: 0; flex: 1 1 100%; }
   .admin-layout,
   .admin-metrics {
     grid-template-columns: 1fr;
