@@ -14,7 +14,6 @@ function textFromMessages(messages: Message[]) {
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!body || !Array.isArray(body.messages)) return NextResponse.json({ error: { message: "messages doit être un tableau", type: "invalid_request_error" } }, { status: 400 });
-  if (body.stream === true) return NextResponse.json({ error: { message: "Le streaming n'est pas encore disponible. Désactivez stream dans Kilocode.", type: "invalid_request_error", code: "stream_not_supported" } }, { status: 400 });
   const requestedModel = String(body.model ?? "gpt-5.6-luna");
   const modelAliases: Record<string, string> = {
     "gpt-5.6-luna": "gpt-5.6-luna",
@@ -46,5 +45,20 @@ export async function POST(request: Request) {
   const content = payload.output_text ?? payload.output?.map((item: any) => item.content?.map((part: any) => part.text ?? "").join("")).join("\n") ?? payload.response ?? payload.content ?? payload.choices?.[0]?.message?.content ?? "";
   if (!String(content).trim()) return NextResponse.json({ error: { message: "Le fournisseur a retourné une réponse vide ou incomplète", type: "upstream_error", code: "empty_provider_response" } }, { status: 502 });
   const usage = payload.usage ?? {};
+  if (body.stream === true) {
+    const id = `chatcmpl-${crypto.randomUUID()}`;
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        const send = (chunk: object) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+        send({ id, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }] });
+        send({ id, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: String(content) }, finish_reason: null }] });
+        send({ id, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: {}, finish_reason: "stop" }], usage: { prompt_tokens: Number(usage.input_tokens ?? 0), completion_tokens: Number(usage.output_tokens ?? 0), total_tokens: Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0) } });
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      },
+    });
+    return new Response(stream, { headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive" } });
+  }
   return NextResponse.json({ id: `chatcmpl-${crypto.randomUUID()}`, object: "chat.completion", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, message: { role: "assistant", content: String(content) }, finish_reason: "stop" }], usage: { prompt_tokens: Number(usage.input_tokens ?? 0), completion_tokens: Number(usage.output_tokens ?? 0), total_tokens: Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0) } }, { status: 200, headers: { "Cache-Control": "no-store" } });
 }
