@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     const code = error instanceof Error ? error.message : "";
     if (code === "WELCOME_POOL_INSUFFICIENT") return NextResponse.json({ error: "Le bonus de bienvenue est temporairement indisponible." }, { status: 503 });
     if (code === "WELCOME_POOL_UNAVAILABLE") return NextResponse.json({ error: "Aucune réserve Imọlẹ active n'est configurée." }, { status: 503 });
-    return NextResponse.json({ error: "Impossible d'activer le bonus de bienvenue." }, { status: 503 });
+    console.error("welcome_credit_failed", { code, uid: user.uid });
+    return NextResponse.json({ error: "Impossible d'activer le bonus de bienvenue. Vérifiez les variables Firebase Admin et la réserve Imọlẹ active." }, { status: 503 });
   }
 }

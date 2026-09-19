@@ -1183,6 +1183,9 @@ function BuyModal({
 }
 
 function firebaseMessage(error: unknown) {
+  if (error instanceof Error && error.message.startsWith("Le bonus")) return error.message;
+  if (error instanceof Error && error.message.startsWith("Aucune réserve")) return error.message;
+  if (error instanceof Error && error.message.startsWith("Impossible d'activer")) return error.message;
   const code = (error as { code?: string })?.code ?? "";
   if (code.includes("invalid-credential")) return "Email ou mot de passe incorrect.";
   if (code.includes("email-already-in-use")) return "Un compte existe déjà avec cet email.";
