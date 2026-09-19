@@ -16,7 +16,11 @@ export async function GET(request: Request) {
     const userIds = new Set(users.docs.map((doc) => doc.id));
     const transactionUsers = new Set(transactions.docs.map((doc) => String(doc.data().uid ?? "")).filter(Boolean));
     const sessionUsers = new Set(checkoutSessions.docs.map((doc) => String(doc.data().uid ?? "")).filter(Boolean));
-    const userCount = new Set([...userIds, ...transactionUsers, ...sessionUsers]).size;
+    const allUserIds = new Set<string>();
+    userIds.forEach((id) => allUserIds.add(id));
+    transactionUsers.forEach((id) => allUserIds.add(id));
+    sessionUsers.forEach((id) => allUserIds.add(id));
+    const userCount = allUserIds.size;
     const usageCauris = usageLogs.docs.reduce((total, item) => total + Number(item.data().coutCauris ?? item.data().cauris ?? 0), 0);
     const transactionCauris = transactions.docs.reduce((total, item) => total + (item.data().type === "debit" ? Number(item.data().cauris ?? 0) : 0), 0);
     const paidSessions = checkoutSessions.docs.filter((doc) => doc.data().status === "paid");
