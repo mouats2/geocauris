@@ -131,11 +131,12 @@ function AuthScreen() {
           { uid: credentials.user.uid, email, status: "active", createdAt: serverTimestamp() },
           { merge: true },
         );
-        await setDoc(
-          doc(firestore, "wallets", credentials.user.uid),
-          { uid: credentials.user.uid, soldeCauris: 0, updatedAt: serverTimestamp() },
-          { merge: true },
-        );
+        const token = await credentials.user.getIdToken();
+        const welcomeResponse = await fetch("/api/welcome", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+        if (!welcomeResponse.ok) {
+          const data = await welcomeResponse.json().catch(() => ({}));
+          throw new Error(data.error ?? "Impossible d'activer le bonus de bienvenue.");
+        }
       }
     } catch (caught) {
       setError(firebaseMessage(caught));
